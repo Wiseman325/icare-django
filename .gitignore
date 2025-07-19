@@ -1,0 +1,16 @@
+# Ignore virtual environment
+venv/
+*.pyc
+__pycache__/
+db.sqlite3
+*.log
+
+# VS Code settings (optional)
+.vscode/
+
+# Django static/media files (optional)
+staticfiles/
+media/
+
+# Environment variables
+.env

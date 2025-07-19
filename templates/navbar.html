@@ -1,0 +1,17 @@
+<a href="{% url 'forum-home' %}">
+  <h1>Logo</h1>
+</a>
+
+<form method="GET" action="{% url 'forum-home' %}">
+  <input type="text" name="q" placeholder="Search a forum..." />
+</form>
+
+{% if user.is_authenticated %}
+  <span>Welcome, {{ user.username }}!</span>
+  <br>
+  <a href="{% url 'logout' %}">Logout</a>
+{% else %}
+<a href="{% url 'login' %}">Login</a>
+{% endif %}
+
+<hr>

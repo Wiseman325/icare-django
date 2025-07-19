@@ -1,0 +1,52 @@
+   {% extends "main.html" %}
+   
+   {% block content %}
+
+<style>
+    .home-container {
+        display: grid;
+        grid-template-columns: 1fr 3fr;
+    }
+</style>
+
+    <div class="home-container">
+
+        <div>
+            Filter by Case Types:
+            <hr>
+
+            <div>
+                <a href="{% url 'home' %}">All</a>
+            </div>
+            {% for case_type in case_types %}
+            <div>
+                <a href="{% url 'home'%}?q={{case_type.name}}">{{case_type.name}}</a>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div>
+            <h5>{{case_count}} Case Opened</h5>
+            <a href="{% url 'create-case' %}">Create Case</a>
+            <div>
+                {% for case in cases %}
+                    <div>
+                        {% if request.user == case.user %}
+                        <a href="{% url 'update-case' case.id %}">Edit Case</a>
+                        <a href="{% url 'delete-case' case.id %}">Delete</a>
+                        {% endif %}
+                        <span>@{{case.user.username}}</span>
+                        <br>
+                        <small>{{case.case_type.name}}</small>
+                        <h5>{{case.id}} -- <a href="{% url 'case' case.id %}">{{case.description}}</a></h5>
+                        <hr>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+       
+
+
+    </div>
+
+    {% endblock %}

@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+
+{% block content %}
+<h4>This case page</h4>
+
+{{ case.title }}
+
+{% if case.case_type %}
+    <p>Case Type: {{ case.case_type.name }}</p>
+{% else %}
+    <p>Case Type: Not specified</p>
+{% endif %}
+{{ case.description }}
+
+{% endblock%}
