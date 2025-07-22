@@ -19,5 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('data_manager.urls')),  # Include the URLs from the data_manager app
+    path('', include('data_manager.urls')), 
+    path('api/', include('data_manager.api.urls')), # Include the URLs from the data_manager app
 ]

@@ -7,7 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.auth.forms import UserCreationForm
 from .models import Case, CaseType, roomForum, topic, Message
-from .forms import CaseForm, RoomForm
+from .forms import CaseForm, RoomForm, UserForm
+
 
 
 def loginPage(request):
@@ -212,3 +213,26 @@ def deleteMessage(request, pk):
         message.delete()
         return redirect('forum-home')  # Redirect to home after deleting the case
     return render(request, 'data_manager/delete.html', {'obj': message})
+
+@login_required(login_url='login')
+def updateUser(request):
+    user = request.user
+    form = UserForm(instance=user)
+
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your profile has been updated successfully!")
+            return redirect('user-profile', pk=user.id)
+        
+    return render(request, 'data_manager/update_user.html', {'form': form})
+
+def topicsPage(request):
+    q = request.GET.get('q') if request.GET.get('q') != None else ''
+    topics = topic.objects.filter(name__icontains=q)
+    return render(request, 'data_manager/topics.html', {'topics': topics})
+
+def activityPage(request):
+    forumMessages = Message.objects.all()
+    return render(request, 'data_manager/activity.html', {'forumMessages': forumMessages})
