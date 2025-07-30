@@ -1,0 +1,18 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<p><strong>Case Number:</strong> {{ case.id }}</p>
+<p><strong>Name:</strong> {{ case.title }}</p>
+<p><strong>Description:</strong> {{ case.description }}</p>
+<p><strong>Case Type:</strong> {{ case.case_type }}</p>
+<p><strong>Reported by:</strong> {{ case.user.username }}</p>
+<p><strong>Date Reported:</strong> {{ case.submitted_at|date:"Y-m-d H:i" }}</p>
+<p><strong>Assigned Officer:</strong> {{ case.assigned_officer }}</p>
+<p><strong>Status:</strong> {{ case.status.name }}</p>
+<p><strong>Status Reason:</strong> {{ case.status_reason }}</p>
+
+{% if user.role == 'officer' and case.assigned_officer == user %}
+    <a href="{% url 'case-update-status' case.id %}" class="btn btn--main">Update Status</a>
+{% endif %}
+
+{% endblock %}

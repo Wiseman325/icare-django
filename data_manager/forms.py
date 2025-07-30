@@ -13,7 +13,27 @@ class CaseForm(ModelForm):
     class Meta:
         model = Case
         fields = '__all__'
-        exclude = ['user','status']
+        exclude = ['user','status', 'status_reason', 'assigned_officer']
+
+class AssignOfficerForm(ModelForm):
+    class Meta:
+        model = Case
+        fields = ['assigned_officer']
+
+    
+    def __init__(self, *args, **kwargs):
+        super(AssignOfficerForm, self).__init__(*args, **kwargs)
+        # Filter to only users who are officers
+        self.fields['assigned_officer'].queryset = User.objects.filter(role='officer')
+
+class CaseStatusForm(ModelForm):
+    class Meta:
+        model = Case
+        fields = ['status', 'status_reason']
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.fields['assigned_officer'].required = False
 
 
 class RoomForm(ModelForm):

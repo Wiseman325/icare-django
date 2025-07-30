@@ -1,0 +1,12 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<h2>Assign Officer to Case: {{ case.title }}</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn--main">Assign Officer</button>
+</form>
+
+{% endblock %}

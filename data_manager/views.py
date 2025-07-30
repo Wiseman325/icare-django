@@ -1,11 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render,get_object_or_404, redirect
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from functools import wraps
 from django.db.models import Q
 from .models import Case, CaseType, roomForum, topic, Message, User
-from .forms import CaseForm, RoomForm, UserForm, MyUserCreationForm
+from .forms import CaseForm, RoomForm, UserForm, MyUserCreationForm, AssignOfficerForm, CaseStatusForm
 
 
 
@@ -26,7 +27,7 @@ def loginPage(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('forum-home')
+            return redirect('dashboard-redirect')
         else:
             messages.error(request, "Username or password is incorrect. Please try again!")
     context = {'page': page}
@@ -45,6 +46,7 @@ def registerPage(request):
         form = MyUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
+            user.role = 'citizen'
             user.username = user.username.lower()
             user.save()
             login(request, user)
@@ -53,6 +55,62 @@ def registerPage(request):
             messages.error(request, "An error occurred during registration. Please try again!")
     context = {'form': form}
     return render(request, 'data_manager/login_register.html', context)
+
+def role_required(*allowed_roles):
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            if request.user.role not in allowed_roles:
+                return redirect('home')  # or a custom "Access Denied" page
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
+
+@login_required
+@role_required('commander')  # Only station commanders can assign
+def assignOfficer(request, pk):
+    case = get_object_or_404(Case, id=pk)
+    form = AssignOfficerForm(instance=case)
+
+    if request.method == 'POST':
+        form = AssignOfficerForm(request.POST, instance=case)
+        if form.is_valid():
+            form.save()
+            return redirect('case-detail', pk=pk)  # Go back to case details
+
+    return render(request, 'data_manager/assign_officer.html', {'form': form, 'case': case})
+
+@login_required
+def caseDetail(request, pk):
+    case = get_object_or_404(Case, id=pk)
+
+    # Restrict access:
+    if request.user.role == 'officer' and case.assigned_officer != request.user:
+        return redirect('officer-dashboard')
+    if request.user.role == 'citizen' and case.user != request.user:
+        return redirect('citizen-dashboard')
+
+    return render(request, 'data_manager/case_detail.html', {'case': case})
+
+@login_required
+@role_required('officer')
+def officer_dashboard(request):
+    assigned_cases = Case.objects.filter(assigned_officer=request.user)
+    workload_count = assigned_cases.count()
+
+    return render(request, 'data_manager/officer_dashboard.html', {
+        'cases': assigned_cases,
+        'workload_count': workload_count,
+    })
+
+@login_required
+def redirect_dashboard(request):
+    if request.user.role == 'officer':
+        return redirect('officer-dashboard')
+    elif request.user.role == 'commander':
+        return redirect('commander-dashboard')
+    else:
+        return redirect('citizen-dashboard')
 
 
 def home(request):
@@ -94,8 +152,6 @@ def createCase(request):
 def updateCase(request, pk):
     case = Case.objects.get(id=pk)
     # Only owner allowed to update
-    if request.user != case.user:
-        return HttpResponse("You are not allowed to edit this case.")
 
     form = CaseForm(instance=case)
     context = {'form': form}
@@ -111,12 +167,36 @@ def updateCase(request, pk):
     return render(request, 'data_manager/case_form.html', context)
 
 
+@login_required
+@role_required('officer', 'commander')
+def updateCaseStatus(request, pk):
+    case = get_object_or_404(Case, id=pk)
+
+    # Ensure only assigned officer or commander can update
+    if request.user.role == 'officer' and case.assigned_officer != request.user:
+        return redirect('officer-dashboard')
+
+    form = CaseStatusForm(instance=case)
+
+    if request.method == 'POST':
+        form = CaseStatusForm(request.POST, instance=case)
+        if form.is_valid():
+            form.save()
+            return redirect('case-detail', pk=case.id)
+
+    return render(request, 'data_manager/update_status.html', {'form': form, 'case': case})
+
+
+@login_required
+def citizen_dashboard(request):
+    cases = Case.objects.filter(user=request.user).order_by('-submitted_at')
+    return render(request, 'data_manager/citizen_dashboard.html', {'cases': cases})
+
+
 @login_required(login_url='login')
+@role_required('officer', 'commander')
 def deleteCase(request, pk):
     case = Case.objects.get(id=pk)
-
-    if request.user != case.user:
-        return HttpResponse("You are not allowed to delete this case.")
 
     if request.method == 'POST':
         case.delete()

@@ -31,19 +31,27 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
-    # username field is inherited from AbstractUser, so no need to redefine or remove it
+    ROLE_CHOICES = (
+        ('citizen', 'Citizen'),
+        ('officer', 'Police Officer'),
+        ('commander', 'Station Commander'),
+    )
+
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=200, null=True)
     phone_number = models.CharField(max_length=10, blank=True, null=True)
     avatar = models.ImageField(null=True, default="avatar.svg")
+    
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='citizen')  
 
-    USERNAME_FIELD = "username"  # Use username as login identifier
-    REQUIRED_FIELDS = ['email']  # Email is still required when creating superusers
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ['email']
 
     objects = UserManager()
 
     def __str__(self):
         return self.username
+
 
 
 class CaseType(models.Model):
@@ -55,6 +63,13 @@ class CaseType(models.Model):
 
 class Case(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=CASCADE)
+    assigned_officer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_cases'
+    )
     title = models.CharField(max_length=100)
     description = models.TextField(max_length=500)
     street_address = models.CharField(max_length=255, blank=True, null=True)
@@ -62,6 +77,7 @@ class Case(models.Model):
     case_type = models.ForeignKey(CaseType, on_delete=models.SET_NULL, null=True)
     incident_date = models.DateField(null=True, blank=True)  # new field
     status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True)
+    status_reason = models.TextField(max_length=2500, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
@@ -73,7 +89,6 @@ class Case(models.Model):
 
 class Status(models.Model):
     name = models.CharField(max_length=50)
-    status_reason = models.TextField(max_length=2500, blank=True, null=True)
 
     def __str__(self):
         return self.name

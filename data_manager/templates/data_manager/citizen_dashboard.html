@@ -1,0 +1,46 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<h2>My Reported Cases</h2>
+
+{% if cases %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Date Reported</th>
+            <th>Status</th>
+            <th>Status Reason</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for case in cases %}
+        <tr>
+            <td>{{ case.title }}</td>
+            <td>{{ case.case_type }}</td>
+            <td>{{ case.submitted_at|date:"Y-m-d" }}</td>
+            <td>
+                <span class="badge badge--status">{{ case.status.name }}</span>
+            </td>
+            <td>
+                {% if case.status_reason %}
+                    {{ case.status_reason|truncatechars:30 }}
+                {% else %}
+                    <em>Pending...</em>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>You have not reported any cases yet.</p>
+<a href="{% url 'create-case' %}" class="btn btn--main">Report a Case</a>
+{% endif %}
+
+{% endblock %}

@@ -31,9 +31,12 @@
             <div>
                 {% for case in cases %}
                     <div>
+                        {% if user.role == 'commander' %}
+                         <a href="{% url 'assign-officer' case.id %}" class="btn btn--main">Assign Officer</a>
+                         <a href="{% url 'delete-case' case.id %}">Delete</a>
+                        {% endif %}
                         {% if request.user == case.user %}
                         <a href="{% url 'update-case' case.id %}">Edit Case</a>
-                        <a href="{% url 'delete-case' case.id %}">Delete</a>
                         {% endif %}
                         <span>@{{case.user.username}}</span>
                         <br>

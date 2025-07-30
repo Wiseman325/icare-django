@@ -24,4 +24,12 @@ urlpatterns = [
     path('update-user/', views.updateUser, name='update-user'),
     path('topics/', views.topicsPage, name='topics'),
     path('activity/', views.activityPage, name='activity'),
+
+    path('cases/<int:pk>/assign/', views.assignOfficer, name='assign-officer'),
+    path('cases/<int:pk>/', views.caseDetail, name='case-detail'),
+    path('dashboard/officer/', views.officer_dashboard, name='officer-dashboard'),
+    path('dashboard/', views.redirect_dashboard, name='dashboard-redirect'),
+    path('cases/<int:pk>/update-status/', views.updateCaseStatus, name='case-update-status'),
+    path('dashboard/citizen/', views.citizen_dashboard, name='citizen-dashboard'),
+
     ]

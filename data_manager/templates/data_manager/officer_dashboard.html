@@ -1,0 +1,31 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<h2>Officer Dashboard</h2>
+<p><strong>Your Current Workload:</strong> {{ workload_count }} active case{{ workload_count|pluralize }}</p>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Case Title</th>
+      <th>Status</th>
+      <th>Last Updated</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for case in cases %}
+    <tr>
+      <td>{{ case.title }}</td>
+      <td>{{ case.status.name }}</td>
+      <td>{{ case.updated_at|date:"Y-m-d H:i" }}</td>
+      <td>
+        <a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a>
+        <a href="{% url 'case-update-status' case.id %}" class="btn btn--dark">Update</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
