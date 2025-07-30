@@ -1,17 +1,19 @@
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
-from .models import Case, roomForum , User
+from .models import Case, roomForum, User
 
 
 class MyUserCreationForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ['name', 'username', 'email', 'password1', 'password2']
+        fields = ['username', 'name', 'email', 'password1', 'password2']
+
 
 class CaseForm(ModelForm):
     class Meta:
         model = Case
         fields = '__all__'
+        exclude = ['user','status']
 
 
 class RoomForm(ModelForm):
@@ -24,4 +26,4 @@ class RoomForm(ModelForm):
 class UserForm(ModelForm):
     class Meta:
         model = User
-        fields = ['avatar', 'name', 'username', 'email', 'phone_number']
+        fields = ['username', 'avatar', 'name', 'email', 'phone_number']

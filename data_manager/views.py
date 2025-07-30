@@ -61,7 +61,7 @@ def home(request):
         Q(case_type__name__icontains=q)
         | Q(title__icontains=q)
         | Q(description__icontains=q)
-        | Q(location__icontains=q)
+        | Q(city__icontains=q)
         )
     
     case_count = cases.count()
@@ -82,25 +82,34 @@ def createCase(request):
     if request.method == 'POST':
         form = CaseForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('home')  # Redirect to home after saving the case
+            case = form.save(commit=False)
+            case.user = request.user
+            case.save()
+            return redirect('home')  
+
     return render(request, 'data_manager/case_form.html', context)
+
 
 @login_required(login_url='login')
 def updateCase(request, pk):
     case = Case.objects.get(id=pk)
-    form = CaseForm(instance=case)
-    context = {'form': form}
-
+    # Only owner allowed to update
     if request.user != case.user:
         return HttpResponse("You are not allowed to edit this case.")
+
+    form = CaseForm(instance=case)
+    context = {'form': form}
 
     if request.method == 'POST':
         form = CaseForm(request.POST, instance=case)
         if form.is_valid():
-            form.save()
-            return redirect('home')  # Redirect to home after updating the case
+            case = form.save(commit=False)
+            case.user = request.user  # Ensure the user remains the same
+            case.save()
+            return redirect('home')  # Redirect after update
+
     return render(request, 'data_manager/case_form.html', context)
+
 
 @login_required(login_url='login')
 def deleteCase(request, pk):

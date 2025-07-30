@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'data_manager',
     'rest_framework',
+
 ]
 
 AUTH_USER_MODEL = 'data_manager.User'
