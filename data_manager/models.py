@@ -44,6 +44,21 @@ class User(AbstractUser):
     
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='citizen')  
 
+        # ForeignKeys (normalized fields)
+    rank = models.ForeignKey('Rank', null=True, blank=True, on_delete=models.SET_NULL)
+    station = models.ForeignKey('Station', null=True, blank=True, on_delete=models.SET_NULL)
+    speciality = models.ForeignKey('Speciality', null=True, blank=True, on_delete=models.SET_NULL)
+    management_level = models.ForeignKey('ManagementLevel', null=True, blank=True, on_delete=models.SET_NULL)
+    gender = models.ForeignKey('Gender', null=True, blank=True, on_delete=models.SET_NULL)
+
+    # Others
+    badge_number = models.CharField(max_length=50, null=True, blank=True)
+    years_of_service = models.IntegerField(null=True, blank=True)
+    age = models.PositiveIntegerField(null=True, blank=True)
+    address = models.TextField(null=True, blank=True)
+    id_number = models.CharField(max_length=20, null=True, blank=True)
+
+
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ['email']
 
@@ -93,6 +108,37 @@ class Status(models.Model):
     def __str__(self):
         return self.name
     
+class Speciality(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class Rank(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class Station(models.Model):
+    name = models.CharField(max_length=100)
+    location = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+class ManagementLevel(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class Gender(models.Model):
+    label = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.label
+
 
 class topic(models.Model):
     name = models.CharField(max_length=200)

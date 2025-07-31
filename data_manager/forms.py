@@ -1,6 +1,8 @@
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from .models import Case, roomForum, User
+from django import forms
+from datetime import date
 
 
 class MyUserCreationForm(UserCreationForm):
@@ -43,7 +45,58 @@ class RoomForm(ModelForm):
         exclude = ['host', 'participants']
 
 
-class UserForm(ModelForm):
+class UserForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['username', 'avatar', 'name', 'email', 'phone_number']
+        fields = [
+            'avatar', 'name', 'username', 'email', 'phone_number',
+            'age', 'gender', 'address', 'id_number',
+            'badge_number', 'rank', 'station', 'speciality', 'years_of_service',
+            'management_level'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(UserForm, self).__init__(*args, **kwargs)
+
+        if user:
+            if user.role == 'citizen':
+                exclude_fields = [
+                    'badge_number', 'rank', 'station', 'speciality',
+                    'years_of_service', 'management_level'
+                ]
+            elif user.role == 'officer':
+                exclude_fields = ['management_level']
+            else:  # commander
+                exclude_fields = []
+
+            for field in exclude_fields:
+                if field in self.fields:
+                    self.fields.pop(field)
+
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     age = cleaned_data.get('age')
+    #     id_number = cleaned_data.get('id_number')
+
+    #     if id_number and len(id_number) >= 6:
+    #         try:
+    #             dob_str = id_number[:6]  # YYMMDD
+    #             year = int(dob_str[:2])
+    #             month = int(dob_str[2:4])
+    #             day = int(dob_str[4:6])
+
+    #             # Assume 1900s if year > current YY
+    #             current_year = date.today().year % 100
+    #             full_year = 1900 + year if year > current_year else 2000 + year
+    #             dob = date(full_year, month, day)
+
+    #             today = date.today()
+    #             calculated_age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+    #             if age and calculated_age != age:
+    #                 self.add_error('age', f"Entered age ({age}) does not match ID number (calculated age: {calculated_age})")
+    #         except Exception:
+    #             self.add_error('id_number', "Could not extract valid date from ID number.")
+
+    #     return cleaned_data

@@ -15,4 +15,10 @@
     <a href="{% url 'case-update-status' case.id %}" class="btn btn--main">Update Status</a>
 {% endif %}
 
+{% if user.role == 'citizen' and case.user == request.user %}
+    <a href="{% url 'update-case' case.id %}" class="btn btn--main">Update Case</a>
+{% endif %}
+
+<a href="javascript:history.back()" class="btn btn--dark">← Back</a>
+
 {% endblock %}

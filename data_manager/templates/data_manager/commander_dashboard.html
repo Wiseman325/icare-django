@@ -1,0 +1,82 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<h2>Commander Dashboard</h2>
+
+<h3>Officer Workload Summary</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Officer</th>
+      <th>Cases Assigned</th>
+      <th>Profile</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for officer in officers %}
+    <tr>
+      <td>{{ officer.username }}</td>
+      <td>{{ officer.case_count }}</td>
+      <td><a href="{% url 'officer-profile' officer.id %}" class="btn btn--small">View Profile</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr>
+
+<h3>Unassigned Cases</h3>
+{% if unassigned_cases %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Type</th>
+      <th>Reported By</th>
+      <th>Date</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for case in unassigned_cases %}
+    <tr>
+      <td>{{ case.title }}</td>
+      <td>{{ case.case_type }}</td>
+      <td>{{ case.user.username }}</td>
+      <td>{{ case.submitted_at|date:"Y-m-d" }}</td>
+      <td><a href="{% url 'assign-officer' case.id %}" class="btn btn--main">Assign</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No unassigned cases.</p>
+{% endif %}
+
+<hr>
+
+<h3>All Assigned Cases</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Status</th>
+      <th>Officer</th>
+      <th>Updated</th>
+      <th>View</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for case in assigned_cases %}
+    <tr>
+      <td>{{ case.title }}</td>
+      <td>{{ case.status.name }}</td>
+      <td>{{ case.assigned_officer }}</td>
+      <td>{{ case.updated_at|date:"Y-m-d H:i" }}</td>
+      <td><a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

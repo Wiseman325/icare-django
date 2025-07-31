@@ -31,5 +31,9 @@ urlpatterns = [
     path('dashboard/', views.redirect_dashboard, name='dashboard-redirect'),
     path('cases/<int:pk>/update-status/', views.updateCaseStatus, name='case-update-status'),
     path('dashboard/citizen/', views.citizen_dashboard, name='citizen-dashboard'),
+    path('dashboard/commander/', views.commander_dashboard, name='commander-dashboard'),
+    path('officer/<int:pk>/', views.officer_profile, name='officer-profile'),
+    path('profile/edit/', views.update_profile, name='edit-profile'),
+
 
     ]

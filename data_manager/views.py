@@ -1,10 +1,11 @@
+from itertools import count
 from django.shortcuts import render,get_object_or_404, redirect
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from functools import wraps
-from django.db.models import Q
+from django.db.models import Q, Count
 from .models import Case, CaseType, roomForum, topic, Message, User
 from .forms import CaseForm, RoomForm, UserForm, MyUserCreationForm, AssignOfficerForm, CaseStatusForm
 
@@ -103,6 +104,53 @@ def officer_dashboard(request):
         'workload_count': workload_count,
     })
 
+
+@login_required
+def citizen_dashboard(request):
+    cases = Case.objects.filter(user=request.user).order_by('-submitted_at')
+    return render(request, 'data_manager/citizen_dashboard.html', {'cases': cases})
+
+
+@login_required
+@role_required('commander')
+def commander_dashboard(request):
+    officers = User.objects.filter(role='officer').annotate(
+        case_count=Count('assigned_cases')
+    )
+
+    assigned_cases = Case.objects.exclude(assigned_officer=None)
+    unassigned_cases = Case.objects.filter(assigned_officer=None)
+
+    context = {
+        'officers': officers,
+        'assigned_cases': assigned_cases,
+        'unassigned_cases': unassigned_cases,
+    }
+    return render(request, 'data_manager/commander_dashboard.html', context)
+
+@login_required
+@role_required('commander')
+def officer_profile(request, pk):
+    officer = get_object_or_404(User, id=pk, role='officer')
+    officer_cases = Case.objects.filter(assigned_officer=officer)
+
+    return render(request, 'data_manager/officer_profile.html', {
+        'officer': officer,
+        'cases': officer_cases
+    })
+
+@login_required
+def update_profile(request):
+    form = UserForm(instance=request.user, initial={'user': request.user})
+
+    if request.method == 'POST':
+        form = UserForm(request.POST, request.FILES, instance=request.user, initial={'user': request.user})
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard-redirect')  # redirect to their dashboard
+    return render(request, 'data_manager/edit_profile.html', {'form': form})
+
+
 @login_required
 def redirect_dashboard(request):
     if request.user.role == 'officer':
@@ -143,7 +191,7 @@ def createCase(request):
             case = form.save(commit=False)
             case.user = request.user
             case.save()
-            return redirect('home')  
+            return redirect('dashboard-redirect')  
 
     return render(request, 'data_manager/case_form.html', context)
 
@@ -187,10 +235,6 @@ def updateCaseStatus(request, pk):
     return render(request, 'data_manager/update_status.html', {'form': form, 'case': case})
 
 
-@login_required
-def citizen_dashboard(request):
-    cases = Case.objects.filter(user=request.user).order_by('-submitted_at')
-    return render(request, 'data_manager/citizen_dashboard.html', {'cases': cases})
 
 
 @login_required(login_url='login')
@@ -301,19 +345,30 @@ def deleteMessage(request, pk):
         return redirect('forum-home')  # Redirect to home after deleting the case
     return render(request, 'data_manager/delete.html', {'obj': message})
 
-@login_required(login_url='login')
-def updateUser(request):
-    user = request.user
-    form = UserForm(instance=user)
+# @login_required(login_url='login')
+# def updateUser(request):
+#     user = request.user
+#     form = UserForm(instance=user)
 
-    if request.method == 'POST':
-        form = UserForm(request.POST, request.FILES, instance=user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Your profile has been updated successfully!")
-            return redirect('user-profile', pk=user.id)
+#     if request.method == 'POST':
+#         form = UserForm(request.POST, request.FILES, instance=user)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('user-profile', pk=user.id)
         
-    return render(request, 'data_manager/update_user.html', {'form': form})
+#     return render(request, 'data_manager/update_user.html', {'form': form})
+
+# @login_required(login_url='login')
+# def updateUser(request):
+#     user = request.user
+
+#     if request.method == 'POST':
+#         form = UserForm(request.POST, request.FILES, instance=user, user=user)
+#     else:
+#         form = UserForm(instance=user, user=user)
+
+#     return render(request, 'data_manager/update_user.html', {'form': form})
+
 
 def topicsPage(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
