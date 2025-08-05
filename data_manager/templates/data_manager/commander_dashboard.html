@@ -15,9 +15,15 @@
   <tbody>
     {% for officer in officers %}
     <tr>
-      <td>{{ officer.username }}</td>
+      <td>
+        <a href="{% url 'officer-profile' officer.id %}">
+          {{ officer.username }}
+        </a>
+      </td>
       <td>{{ officer.case_count }}</td>
-      <td><a href="{% url 'officer-profile' officer.id %}" class="btn btn--small">View Profile</a></td>
+      <td>
+        <a href="{% url 'officer-profile' officer.id %}" class="btn btn--small">View Profile</a>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
@@ -34,7 +40,7 @@
       <th>Type</th>
       <th>Reported By</th>
       <th>Date</th>
-      <th>Action</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -42,9 +48,16 @@
     <tr>
       <td>{{ case.title }}</td>
       <td>{{ case.case_type }}</td>
-      <td>{{ case.user.username }}</td>
+      <td>
+        <a href="{% url 'citizen-profile' case.user.id %}">
+          {{ case.user.username }}
+        </a>
+      </td>
       <td>{{ case.submitted_at|date:"Y-m-d" }}</td>
-      <td><a href="{% url 'assign-officer' case.id %}" class="btn btn--main">Assign</a></td>
+      <td>
+        <a href="{% url 'case-detail' case.id %}" class="btn btn--small">View Case</a>
+        <a href="{% url 'assign-officer' case.id %}" class="btn btn--main">Assign Officer</a>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
@@ -71,7 +84,15 @@
     <tr>
       <td>{{ case.title }}</td>
       <td>{{ case.status.name }}</td>
-      <td>{{ case.assigned_officer }}</td>
+      <td>
+        {% if case.assigned_officer %}
+          <a href="{% url 'officer-profile' case.assigned_officer.id %}">
+            {{ case.assigned_officer.username }}
+          </a>
+        {% else %}
+          Not Assigned
+        {% endif %}
+      </td>
       <td>{{ case.updated_at|date:"Y-m-d H:i" }}</td>
       <td><a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a></td>
     </tr>

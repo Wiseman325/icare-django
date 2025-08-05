@@ -6,9 +6,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from functools import wraps
 from django.db.models import Q, Count
-from .models import Case, CaseType, roomForum, topic, Message, User
-from .forms import CaseForm, RoomForm, UserForm, MyUserCreationForm, AssignOfficerForm, CaseStatusForm
-
+from .models import Case, CaseType, roomForum, topic, Message, User, CaseStatusHistory
+from .forms import CaseForm, RoomForm, UserForm, MyUserCreationForm, AssignOfficerForm, CaseStatusForm, EvidenceUploadForm
 
 
 def loginPage(request):
@@ -94,6 +93,23 @@ def caseDetail(request, pk):
     return render(request, 'data_manager/case_detail.html', {'case': case})
 
 @login_required
+def upload_evidence(request, pk):
+    case = get_object_or_404(Case, id=pk)
+    form = EvidenceUploadForm()
+
+    if request.method == 'POST':
+        form = EvidenceUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            evidence = form.save(commit=False)
+            evidence.case = case
+            evidence.uploaded_by = request.user
+            evidence.save()
+            return redirect('case-detail', pk=case.id)
+
+    return render(request, 'data_manager/upload_evidence.html', {'form': form, 'case': case})
+
+
+@login_required
 @role_required('officer')
 def officer_dashboard(request):
     assigned_cases = Case.objects.filter(assigned_officer=request.user)
@@ -127,6 +143,15 @@ def commander_dashboard(request):
         'unassigned_cases': unassigned_cases,
     }
     return render(request, 'data_manager/commander_dashboard.html', context)
+
+
+@login_required
+@role_required('commander')
+def view_citizen_profile(request, pk):
+    citizen = get_object_or_404(User, id=pk, role='citizen')
+    cases = Case.objects.filter(user=citizen)
+    return render(request, 'data_manager/citizen_profile.html', {'citizen': citizen, 'cases': cases})
+
 
 @login_required
 @role_required('commander')
@@ -183,18 +208,31 @@ def case(request, pk):
 
 @login_required(login_url='login')
 def createCase(request):
-    form = CaseForm()
-    context = {'form': form}
+    case_form = CaseForm()
+    evidence_form = EvidenceUploadForm()
+
     if request.method == 'POST':
-        form = CaseForm(request.POST)
-        if form.is_valid():
-            case = form.save(commit=False)
+        case_form = CaseForm(request.POST)
+        evidence_form = EvidenceUploadForm(request.POST, request.FILES)
+
+        if case_form.is_valid():
+            case = case_form.save(commit=False)
             case.user = request.user
             case.save()
-            return redirect('dashboard-redirect')  
 
+            if evidence_form.is_valid() and 'file' in request.FILES:
+                evidence = evidence_form.save(commit=False)
+                evidence.case = case
+                evidence.uploaded_by = request.user
+                evidence.save()
+
+            return redirect('dashboard-redirect')
+
+    context = {
+        'form': case_form,
+        'evidence_form': evidence_form
+    }
     return render(request, 'data_manager/case_form.html', context)
-
 
 @login_required(login_url='login')
 def updateCase(request, pk):
@@ -230,6 +268,14 @@ def updateCaseStatus(request, pk):
         form = CaseStatusForm(request.POST, instance=case)
         if form.is_valid():
             form.save()
+
+                    # Record status change history
+            CaseStatusHistory.objects.create(
+                case=case,
+                status=case.status,
+                reason=case.status_reason,
+                updated_by=request.user
+            )
             return redirect('case-detail', pk=case.id)
 
     return render(request, 'data_manager/update_status.html', {'form': form, 'case': case})
@@ -345,29 +391,19 @@ def deleteMessage(request, pk):
         return redirect('forum-home')  # Redirect to home after deleting the case
     return render(request, 'data_manager/delete.html', {'obj': message})
 
-# @login_required(login_url='login')
-# def updateUser(request):
-#     user = request.user
-#     form = UserForm(instance=user)
+@login_required(login_url='login')
+def updateUser(request):
+    user = request.user
 
-#     if request.method == 'POST':
-#         form = UserForm(request.POST, request.FILES, instance=user)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('user-profile', pk=user.id)
-        
-#     return render(request, 'data_manager/update_user.html', {'form': form})
+    if request.method == 'POST':
+        form = UserForm(request.POST, request.FILES, instance=user, user=user)
+        if form.is_valid():
+            form.save()
+            return redirect('user-profile', pk=user.id)
+    else:
+        form = UserForm(instance=user, user=user)
 
-# @login_required(login_url='login')
-# def updateUser(request):
-#     user = request.user
-
-#     if request.method == 'POST':
-#         form = UserForm(request.POST, request.FILES, instance=user, user=user)
-#     else:
-#         form = UserForm(instance=user, user=user)
-
-#     return render(request, 'data_manager/update_user.html', {'form': form})
+    return render(request, 'data_manager/update_user.html', {'form': form})
 
 
 def topicsPage(request):

@@ -1,0 +1,39 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<h2>Citizen Profile: {{ citizen.username }}</h2>
+
+<img src="{{ citizen.avatar.url }}" width="100" height="100" style="border-radius: 50%;">
+
+<ul>
+  <li><strong>Name:</strong> {{ citizen.name }}</li>
+  <li><strong>Email:</strong> {{ citizen.email }}</li>
+  <li><strong>Phone:</strong> {{ citizen.phone_number }}</li>
+  <li><strong>Gender:</strong> {{ citizen.gender }}</li>
+  <li><strong>Age:</strong> {{ citizen.age }}</li>
+  <li><strong>Address:</strong> {{ citizen.address }}</li>
+  <li><strong>ID Number:</strong> {{ citizen.id_number }}</li>
+</ul>
+
+<h3>Submitted Cases</h3>
+{% if cases %}
+  <table class="table">
+    <thead>
+      <tr><th>Title</th><th>Status</th><th>Reported</th></tr>
+    </thead>
+    <tbody>
+      {% for case in cases %}
+      <tr>
+        <td>{{ case.title }}</td>
+        <td>{{ case.status.name }}</td>
+        <td>{{ case.submitted_at|date:"Y-m-d" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No reported cases.</p>
+{% endif %}
+
+<a href="javascript:history.back()" class="btn btn--dark">← Back</a>
+{% endblock %}

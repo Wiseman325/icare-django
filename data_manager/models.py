@@ -102,6 +102,25 @@ class Case(models.Model):
     def __str__(self):
         return self.title
 
+class CaseStatusHistory(models.Model):
+    case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='status_history')
+    status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True)
+    reason = models.TextField(max_length=2500, blank=True, null=True)
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.case.title} - {self.status.name} by {self.updated_by.username}"
+    
+class EvidenceFile(models.Model):
+    case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='evidence_files')
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    file = models.FileField(upload_to='evidence/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.case.title} - {self.file.name}"
+
 class Status(models.Model):
     name = models.CharField(max_length=50)
 

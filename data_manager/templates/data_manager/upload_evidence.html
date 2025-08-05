@@ -1,0 +1,12 @@
+{% extends 'main.html' %}
+{% block content %}
+<h3>Upload Evidence for Case: {{ case.title }}</h3>
+
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn--main" type="submit">Upload</button>
+</form>
+
+<a href="{% url 'case-detail' case.id %}" class="btn btn--dark">← Back</a>
+{% endblock %}

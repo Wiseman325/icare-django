@@ -20,5 +20,53 @@
 {% endif %}
 
 <a href="javascript:history.back()" class="btn btn--dark">← Back</a>
+<hr>
+<h3>Evidence Files</h3>
+{% if case.evidence_files.all %}
+  <ul>
+    {% for file in case.evidence_files.all %}
+    <li>
+      <a href="{{ file.file.url }}" target="_blank">{{ file.file.name }}</a>
+      (Uploaded by {{ file.uploaded_by.username }} on {{ file.uploaded_at|date:"Y-m-d H:i" }})
+    </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No evidence uploaded yet.</p>
+{% endif %}
+
+{% if user.role in 'citizen' %}
+  <a href="{% url 'upload-evidence' case.id %}" class="btn btn--main">Upload Evidence</a>
+{% endif %}
+<hr>
+
+{% if user.role in 'commander' %}
+<h3>Status History</h3>
+{% if case.status_history.all %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Reason</th>
+        <th>By</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in case.status_history.all %}
+      <tr>
+        <td>{{ entry.status.name }}</td>
+        <td>{{ entry.reason }}</td>
+        <td>{{ entry.updated_by.username }}</td>
+        <td>{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No history available.</p>
+{% endif %}
+{% endif %}
+
 
 {% endblock %}

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import Case, CaseType, roomForum, topic, Message, User, Status, Speciality, Rank, Station, ManagementLevel, Gender
+from .models import Case, CaseType, roomForum, topic, Message, User, Status, Speciality, Rank, Station, ManagementLevel, Gender, CaseStatusHistory
 
 # Custom UserAdmin with role support
 class CustomUserAdmin(BaseUserAdmin):
@@ -29,3 +29,4 @@ admin.site.register(Rank)
 admin.site.register(Station)
 admin.site.register(ManagementLevel)
 admin.site.register(Gender)
+admin.site.register(CaseStatusHistory)

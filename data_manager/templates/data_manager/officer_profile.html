@@ -2,34 +2,44 @@
 {% block content %}
 
 <h2>Officer Profile: {{ officer.username }}</h2>
-<p><strong>Name:</strong> {{ officer.name }}</p>
-<p><strong>Email:</strong> {{ officer.email }}</p>
-<p><strong>Phone:</strong> {{ officer.phone_number }}</p>
+
+<img src="{{ officer.avatar.url }}" width="100" height="100" style="border-radius: 50%;">
+
+<ul>
+  <li><strong>Name:</strong> {{ officer.name }}</li>
+  <li><strong>Email:</strong> {{ officer.email }}</li>
+  <li><strong>Phone:</strong> {{ officer.phone_number }}</li>
+  <li><strong>Badge Number:</strong> {{ officer.badge_number }}</li>
+  <li><strong>Rank:</strong> {{ officer.rank }}</li>
+  <li><strong>Station:</strong> {{ officer.station }}</li>
+  <li><strong>Speciality:</strong> {{ officer.speciality }}</li>
+  <li><strong>Years of Service:</strong> {{ officer.years_of_service }}</li>
+</ul>
 
 <h3>Assigned Cases</h3>
 {% if cases %}
-<table class="table">
-  <thead>
-    <tr>
-      <th>Case Title</th>
-      <th>Status</th>
-      <th>Date Assigned</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for case in cases %}
-    <tr>
-      <td>{{ case.title }}</td>
-      <td>{{ case.status.name }}</td>
-      <td>{{ case.updated_at|date:"Y-m-d" }}</td>
-      <td><a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Case Title</th>
+        <th>Status</th>
+        <th>Date Assigned</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for case in cases %}
+      <tr>
+        <td>{{ case.title }}</td>
+        <td>{{ case.status.name }}</td>
+        <td>{{ case.updated_at|date:"Y-m-d" }}</td>
+        <td><a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% else %}
-<p>This officer has no assigned cases.</p>
+  <p>This officer has no assigned cases.</p>
 {% endif %}
 
 <a href="javascript:history.back()" class="btn btn--dark">← Back</a>

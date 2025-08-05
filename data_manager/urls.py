@@ -33,7 +33,8 @@ urlpatterns = [
     path('dashboard/citizen/', views.citizen_dashboard, name='citizen-dashboard'),
     path('dashboard/commander/', views.commander_dashboard, name='commander-dashboard'),
     path('officer/<int:pk>/', views.officer_profile, name='officer-profile'),
+    path('citizen/<int:pk>/', views.view_citizen_profile, name='citizen-profile'),
     path('profile/edit/', views.update_profile, name='edit-profile'),
-
+    path('case/<int:pk>/upload-evidence/', views.upload_evidence, name='upload-evidence'),
 
     ]
