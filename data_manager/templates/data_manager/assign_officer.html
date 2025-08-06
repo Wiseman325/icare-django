@@ -1,12 +1,69 @@
-{% extends 'main.html' %}
+{% extends "main.html" %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'styles/assign_officer.css' %}">
+{% endblock %}
+
 {% block content %}
+<main class="layout">
+  <div class="container">
+    <div class="layout__box">
+      <div class="layout__boxHeader">
+        <div class="layout__boxTitle">
+          <svg onclick="history.back()" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+            <path d="M13.723 2.286l-13.723 13.714 13.719 13.714 1.616-1.611-10.96-10.96h27.625v-2.286h-27.625l10.965-10.965-1.616-1.607z" />
+          </svg>
+          <h3>Assign Officer to Case</h3>
+        </div>
+      </div>
 
-<h2>Assign Officer to Case: {{ case.title }}</h2>
+      <div class="layout__body">
+        <!-- Case Summary -->
+        <div class="case-info">
+          <h2 class="case-info__title">{{ case.title }}</h2>
+          <div class="case-details">
+            <div class="case-detail"><strong>Case Number:</strong> {{ case.id }}</div>
+            <div class="case-detail"><strong>Submitted:</strong> {{ case.submitted_at|date:"Y-m-d" }}</div>
+            <!-- <div class="case-detail"><strong>Status:</strong>
+              <span class="status-badge status-badge--{{ case.status.name|lower|cut:" " }}">
+                {{ case.status.name }}
+              </span>
+            </div> -->
+            <div class="case-detail"><strong>Incident Location:</strong> {{ case.street_address }}, {{ case.city }}</div>
+            <div class="case-detail"><strong>Reported by:</strong> {{ case.user.name }}</div>
+          </div>
+        </div>
 
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn--main">Assign Officer</button>
-</form>
+        <hr style="margin: 2rem 0;">
 
+        <!-- Officer Assignment Form -->
+        <form method="POST">
+          {% csrf_token %}
+          <div class="form__group">
+            <label for="id_assigned_officer">Select Officer</label>
+            {{ form.assigned_officer }}
+          </div>
+
+          <div class="form__action">
+            <a class="btn btn--dark" href="javascript:history.back()">Cancel</a>
+            <button type="submit" class="btn btn--main">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"/>
+              </svg>
+              Assign Officer
+            </button>
+          </div>
+        </form>
+
+        {% if form.errors %}
+          <div class="form__errors">
+            {{ form.errors }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</main>
 {% endblock %}

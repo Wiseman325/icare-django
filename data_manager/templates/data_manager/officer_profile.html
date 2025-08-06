@@ -1,46 +1,110 @@
 {% extends 'main.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'styles/officer_profile.css' %}">
+{% endblock %}
+
 {% block content %}
+<div class="container">
+  <div class="profile-layout">
 
-<h2>Officer Profile: {{ officer.username }}</h2>
+    <!-- Officer Profile Card -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar">
+          {% if officer.avatar %}
+            <img src="{{ officer.avatar.url }}" alt="{{ officer.name }}">
+          {% else %}
+            <img src="{% static 'images/default-avatar.png' %}" alt="No Avatar">
+          {% endif %}
+          <div class="status-indicator"></div>
+        </div>
+        <h1 class="profile-name">{{ officer.name }}</h1>
+        <div class="profile-title">{{ officer.role|title }}</div>
+      </div>
 
-<img src="{{ officer.avatar.url }}" width="100" height="100" style="border-radius: 50%;">
+      <div class="profile-details">
+        <div class="detail-group">
+          <div class="detail-item">
+            <span class="detail-label">Email</span>
+            <span class="detail-value">{{ officer.email }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Phone</span>
+            <span class="detail-value">{{ officer.phone_number }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Badge</span>
+            <span class="detail-value badge-number">{{ officer.badge_number }}</span>
+          </div>
+        </div>
 
-<ul>
-  <li><strong>Name:</strong> {{ officer.name }}</li>
-  <li><strong>Email:</strong> {{ officer.email }}</li>
-  <li><strong>Phone:</strong> {{ officer.phone_number }}</li>
-  <li><strong>Badge Number:</strong> {{ officer.badge_number }}</li>
-  <li><strong>Rank:</strong> {{ officer.rank }}</li>
-  <li><strong>Station:</strong> {{ officer.station }}</li>
-  <li><strong>Speciality:</strong> {{ officer.speciality }}</li>
-  <li><strong>Years of Service:</strong> {{ officer.years_of_service }}</li>
-</ul>
+        <div class="detail-group">
+          <div class="detail-item">
+            <span class="detail-label">Rank</span>
+            <span class="detail-value rank-badge">{{ officer.rank.name }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Station</span>
+            <span class="detail-value">{{ officer.station.name }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Speciality</span>
+            <span class="detail-value specialty-tag">{{ officer.speciality.name }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Service</span>
+            <span class="detail-value years-badge">{{ officer.years_of_service }} Years</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<h3>Assigned Cases</h3>
-{% if cases %}
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Case Title</th>
-        <th>Status</th>
-        <th>Date Assigned</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for case in cases %}
-      <tr>
-        <td>{{ case.title }}</td>
-        <td>{{ case.status.name }}</td>
-        <td>{{ case.updated_at|date:"Y-m-d" }}</td>
-        <td><a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-{% else %}
-  <p>This officer has no assigned cases.</p>
-{% endif %}
+    <!-- Officer Cases Section -->
+    <div class="cases-section">
+      <div class="cases-header">
+        <h2>Assigned Cases</h2>
+        <div class="cases-count">{{ cases|length }} Active Case{{ cases|length|pluralize }}</div>
+      </div>
 
-<a href="javascript:history.back()" class="btn btn--dark">← Back</a>
+      {% if cases %}
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Case Title</th>
+              <th>Status</th>
+              <th>Date Assigned</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for case in cases %}
+            <tr>
+              <td class="case-title">{{ case.title }}</td>
+              <td><span class="status-badge status-badge--{{ case.status.name|lower|cut:" " }}">{{ case.status.name }}</span></td>
+              <td>{{ case.updated_at|date:"Y-m-d" }}</td>
+              <td>
+                <a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <div class="empty-state">
+          <h3>No Assigned Cases</h3>
+          <p>This officer currently has no assigned cases.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Back Button -->
+    <div class="back-button">
+      <a href="javascript:history.back()" class="btn btn--dark">← Back to Dashboard</a>
+    </div>
+  </div>
+</div>
 {% endblock %}

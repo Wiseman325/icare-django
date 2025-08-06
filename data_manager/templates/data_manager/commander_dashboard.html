@@ -1,103 +1,170 @@
-{% extends 'main.html' %}
+{% extends "main.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'styles/commander_dashboard.css' %}">
+{% endblock %}
+
 {% block content %}
+<body>
+    <div class="container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h1>Commander Dashboard</h1>
+            <p>Overview of department operations and case management</p>
+        </div>
 
-<h2>Commander Dashboard</h2>
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Officers</h3>
+                <div class="number">{{officer_count}}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Cases</h3>
+                <div class="number">{{active_cases_count}}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Unassigned Cases</h3>
+                <div class="number">{{unassigned_cases_count}}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Cases This Month</h3>
+                <div class="number">{{cases_this_month}}</div>
+            </div>
+        </div>
 
-<h3>Officer Workload Summary</h3>
-<table class="table">
-  <thead>
-    <tr>
-      <th>Officer</th>
-      <th>Cases Assigned</th>
-      <th>Profile</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for officer in officers %}
-    <tr>
-      <td>
-        <a href="{% url 'officer-profile' officer.id %}">
-          {{ officer.username }}
-        </a>
-      </td>
-      <td>{{ officer.case_count }}</td>
-      <td>
-        <a href="{% url 'officer-profile' officer.id %}" class="btn btn--small">View Profile</a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+        <!-- Officer Workload Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Officer Workload Summary</h2>
+            </div>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Officer</th>
+                            <th>Cases Assigned</th>
+                            <th>Active Cases</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      {% for officer in officers %}
+                      <tr>
+                        <td>
+                          <div class="officer-info">
+                            <div class="officer-avatar">
+                              <img src="{{ officer.avatar.url }}" alt="{{ officer.username }}" class="avatar-img">
+                            </div>
+                            <a href="{% url 'officer-profile' officer.id %}">{{ officer.name }}</a>
+                          </div>
+                        </td>
+                        <td>{{ officer.case_count }}</td>
+                        <td>{{ officer.active_case_count }}</td>
+                        <td>
+                          <a href="{% url 'officer-profile' officer.id %}" class="btn btn--small">View Profile</a>
+                        </td>
+                      </tr>
+                      {% empty %}
+                      <tr><td colspan="4">No officers found.</td></tr>
+                      {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-<hr>
+        <!-- Unassigned Cases Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Unassigned Cases</h2>
+                <span class="status-badge status-badge--pending">{{ unassigned_cases_count}} Pending</span>
+            </div>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Case Title</th>
+                            <th>Type</th>
+                            <th>Reported By</th>
+                            <th>Date Submitted</th>
+                            <th>Priority</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      {% for case in unassigned_cases %}
+                      <tr>
+                        <td><strong>{{ case.title }}</strong></td>
+                        <td>{{ case.case_type }}</td>
+                        <td>
+                          <a href="{% url 'citizen-profile' case.user.id %}">
+                            {{ case.user.username }}
+                          </a>
+                        </td>
+                        <td>{{ case.submitted_at|date:"Y-m-d" }}</td>
+                        <td>
+                          <span class="status-badge status-badge--pending">Medium</span>
+                        </td>
+                        <td>
+                          <a href="{% url 'case-detail' case.id %}" class="btn btn--small">View Case</a>
+                          <a href="{% url 'assign-officer' case.id %}" class="btn btn--main">Assign Officer</a>
+                        </td>
+                      </tr>
+                      {% empty %}
+                      <tr><td colspan="6">No unassigned cases found.</td></tr>
+                      {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-<h3>Unassigned Cases</h3>
-{% if unassigned_cases %}
-<table class="table">
-  <thead>
-    <tr>
-      <th>Title</th>
-      <th>Type</th>
-      <th>Reported By</th>
-      <th>Date</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for case in unassigned_cases %}
-    <tr>
-      <td>{{ case.title }}</td>
-      <td>{{ case.case_type }}</td>
-      <td>
-        <a href="{% url 'citizen-profile' case.user.id %}">
-          {{ case.user.username }}
-        </a>
-      </td>
-      <td>{{ case.submitted_at|date:"Y-m-d" }}</td>
-      <td>
-        <a href="{% url 'case-detail' case.id %}" class="btn btn--small">View Case</a>
-        <a href="{% url 'assign-officer' case.id %}" class="btn btn--main">Assign Officer</a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p>No unassigned cases.</p>
-{% endif %}
-
-<hr>
-
-<h3>All Assigned Cases</h3>
-<table class="table">
-  <thead>
-    <tr>
-      <th>Title</th>
-      <th>Status</th>
-      <th>Officer</th>
-      <th>Updated</th>
-      <th>View</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for case in assigned_cases %}
-    <tr>
-      <td>{{ case.title }}</td>
-      <td>{{ case.status.name }}</td>
-      <td>
-        {% if case.assigned_officer %}
-          <a href="{% url 'officer-profile' case.assigned_officer.id %}">
-            {{ case.assigned_officer.username }}
-          </a>
-        {% else %}
-          Not Assigned
-        {% endif %}
-      </td>
-      <td>{{ case.updated_at|date:"Y-m-d H:i" }}</td>
-      <td><a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
+        <!-- All Assigned Cases Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>All Assigned Cases</h2>
+                <span class="status-badge status-badge--open">{{active_cases_count}} Active</span>
+            </div>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Case Title</th>
+                            <th>Status</th>
+                            <th>Assigned Officer</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      {% for case in assigned_cases %}
+                        <tr>
+                          <td><strong>{{ case.title }}</strong></td>
+                          <td>
+                            <span class="status-badge status-badge--{{ case.status.name|lower|cut:" " }}">
+                              {{ case.status.name }}
+                            </span>
+                          </td>
+                          <td>
+                            <div class="officer-info">
+                              <div class="officer-avatar">
+                                <img src="{{ case.assigned_officer.avatar.url }}" alt="{{ case.assigned_officer.username }}" class="avatar-img">
+                              </div>
+                              <a href="{% url 'officer-profile' case.assigned_officer.id %}">{{ case.assigned_officer.name }}</a>
+                            </div>
+                          </td>
+                          <td>{{ case.updated_at|date:"Y-m-d H:i" }}</td>
+                          <td>
+                            <a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a>
+                          </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5">No assigned cases found.</td></tr>
+                      {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
 {% endblock %}

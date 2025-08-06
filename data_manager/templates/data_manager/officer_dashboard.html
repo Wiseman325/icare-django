@@ -1,31 +1,95 @@
 {% extends 'main.html' %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'styles/officer_dashboard.css' %}">
+{% endblock %}
+
 {% block content %}
+<div class="container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="dashboard-header__left">
+            <div class="officer-avatar">
+                {{ user.username|slice:":2"|upper }}
+            </div>
+            <div>
+                <h2>Officer Dashboard</h2>
+                <p>Welcome back, {{ user.name }}</p>
+            </div>
+        </div>
+        <div class="dashboard-header__right">
+            <div class="workload-counter">{{ workload_count }} Active Case{{ workload_count|pluralize }}</div>
+            <p class="last-login">Last login: Today</p> <!-- Optional field -->
+        </div>
+    </div>
 
-<h2>Officer Dashboard</h2>
-<p><strong>Your Current Workload:</strong> {{ workload_count }} active case{{ workload_count|pluralize }}</p>
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-card__icon">
+                <i class="fas fa-briefcase"></i>
+            </div>
+            <div class="stat-card__number">{{ workload_count }}</div>
+            <div class="stat-card__label">Active Cases</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card__icon">
+                <i class="fas fa-user-secret"></i>
+            </div>
+            <div class="stat-card__number">{{ investigating_count }}</div>
+            <div class="stat-card__label">Investigating</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card__icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-card__number">{{ solved_count }}</div>
+            <div class="stat-card__label">Solved This Month</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card__icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div class="stat-card__number">{{ urgent_count }}</div>
+            <div class="stat-card__label">Urgent Priority</div>
+        </div>
+    </div>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th>Case Title</th>
-      <th>Status</th>
-      <th>Last Updated</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for case in cases %}
-    <tr>
-      <td>{{ case.title }}</td>
-      <td>{{ case.status.name }}</td>
-      <td>{{ case.updated_at|date:"Y-m-d H:i" }}</td>
-      <td>
-        <a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a>
-        <a href="{% url 'case-update-status' case.id %}" class="btn btn--dark">Update</a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+    <!-- Cases Table -->
+    <div class="cases-section">
+        <div class="cases-section__header">
+            <h3>Your Assigned Cases</h3>
+        </div>
 
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Case Title</th>
+                        <th>Status</th>
+                        <th>Last Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for case in cases %}
+                    <tr>
+                        <td>{{ case.title }}</td>
+                        <td><span class="status-badge status-badge--{{ case.status.name|lower|cut:' ' }}">{{ case.status.name }}</span></td>
+                        <td>{{ case.updated_at|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            <a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a>
+                            <a href="{% url 'case-update-status' case.id %}" class="btn btn--dark">Update</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4">No cases assigned.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

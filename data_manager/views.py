@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from functools import wraps
 from django.db.models import Q, Count
+from datetime import datetime, timedelta
 from .models import Case, CaseType, roomForum, topic, Message, User, CaseStatusHistory
 from .forms import CaseForm, RoomForm, UserForm, MyUserCreationForm, AssignOfficerForm, CaseStatusForm, EvidenceUploadForm
 
@@ -80,6 +81,44 @@ def assignOfficer(request, pk):
 
     return render(request, 'data_manager/assign_officer.html', {'form': form, 'case': case})
 
+# @login_required(login_url='login')
+# def assign_officer(request, case_id):
+#     case = get_object_or_404(Case, id=case_id)
+
+#     form = AssignOfficerForm(request.POST or None, instance=case)
+
+#     if request.method == 'POST':
+#         if form.is_valid():
+#             previous_status = case.status  # Optional: capture status before change
+#             assigned_officer = form.cleaned_data['assigned_officer']
+
+#             case.assigned_officer = assigned_officer
+
+#             # Optional: update status to something like "In Progress"
+#             if previous_status.name.lower() == "pending":
+#                 in_progress_status = Status.objects.filter(name__iexact="In Progress").first()
+#                 if in_progress_status:
+#                     case.status = in_progress_status
+
+#             case.save()
+
+#             # Log the status update
+#             CaseStatusHistory.objects.create(
+#                 case=case,
+#                 status=case.status,
+#                 reason="Officer assigned via commander dashboard",
+#                 updated_by=request.user,
+#                 timestamp=timezone.now()
+#             )
+
+#             return redirect('case-detail', case_id=case.id)
+
+#     return render(request, 'data_manager/assign_officer.html', {
+#         'form': form,
+#         'case': case
+#     })
+
+
 @login_required
 def caseDetail(request, pk):
     case = get_object_or_404(Case, id=pk)
@@ -126,31 +165,52 @@ def citizen_dashboard(request):
     cases = Case.objects.filter(user=request.user).order_by('-submitted_at')
     return render(request, 'data_manager/citizen_dashboard.html', {'cases': cases})
 
-
-@login_required
-@role_required('commander')
 def commander_dashboard(request):
-    officers = User.objects.filter(role='officer').annotate(
-        case_count=Count('assigned_cases')
-    )
+    officers = User.objects.filter(role='officer') \
+        .annotate(
+            case_count=Count('assigned_cases'),
+            active_case_count=Count('assigned_cases', filter=Q(assigned_cases__status__name='In Progress'))
+        )
 
     assigned_cases = Case.objects.exclude(assigned_officer=None)
     unassigned_cases = Case.objects.filter(assigned_officer=None)
 
+    # Optional: Add time filter
+    start_of_month = datetime.today().replace(day=1)
+    cases_this_month = Case.objects.filter(submitted_at__gte=start_of_month)
+    active_cases = Case.objects.exclude(status__name='Resolved')
+
     context = {
+        'officer_count': officers.count(),
+        'active_cases_count': active_cases.count(),
+        'unassigned_cases_count': unassigned_cases.count(),
+        'cases_this_month': cases_this_month.count(),
         'officers': officers,
         'assigned_cases': assigned_cases,
         'unassigned_cases': unassigned_cases,
     }
+
     return render(request, 'data_manager/commander_dashboard.html', context)
 
 
-@login_required
-@role_required('commander')
 def view_citizen_profile(request, pk):
-    citizen = get_object_or_404(User, id=pk, role='citizen')
+    citizen = User.objects.get(id=pk, role='citizen')
     cases = Case.objects.filter(user=citizen)
-    return render(request, 'data_manager/citizen_profile.html', {'citizen': citizen, 'cases': cases})
+
+    total_cases = cases.count()
+    in_progress = cases.filter(status__name="In Progress").count()
+    pending = cases.filter(status__name="Pending").count()
+    resolved = cases.filter(status__name="Resolved").count()
+
+    context = {
+        'citizen': citizen,
+        'cases': cases,
+        'total_cases': total_cases,
+        'in_progress': in_progress,
+        'pending': pending,
+        'resolved': resolved,
+    }
+    return render(request, 'data_manager/citizen_profile.html', context)
 
 
 @login_required

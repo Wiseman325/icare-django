@@ -1,39 +1,141 @@
 {% extends 'main.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'styles/citizen_profile.css' %}">
+{% endblock %}
+
 {% block content %}
+<div class="container">
+  <div class="profile-layout">
 
-<h2>Citizen Profile: {{ citizen.username }}</h2>
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar">
+          {% if citizen.avatar %}
+            <img src="{{ citizen.avatar.url }}" alt="{{ citizen.name }}">
+          {% else %}
+            <img src="{% static 'images/default-avatar.png' %}" alt="No Avatar">
+          {% endif %}
+          <div class="citizen-indicator"></div>
+        </div>
+        <h1 class="profile-name">{{ citizen.name }}</h1>
+        <div class="profile-title">
+          <div class="citizen-badge">
+            <svg class="citizen-icon" viewBox="0 0 24 24">
+              <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+            </svg>
+            Citizen
+          </div>
+        </div>
+      </div>
 
-<img src="{{ citizen.avatar.url }}" width="100" height="100" style="border-radius: 50%;">
+      <div class="profile-details">
+        <!-- Personal Info -->
+        <div class="detail-group personal">
+          <div class="detail-item">
+            <span class="detail-label">Email</span>
+            <span class="detail-value">{{ citizen.email }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Phone</span>
+            <span class="detail-value">{{ citizen.phone_number }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">ID Number</span>
+            <span class="detail-value id-number">{{ citizen.id_number }}</span>
+          </div>
+        </div>
 
-<ul>
-  <li><strong>Name:</strong> {{ citizen.name }}</li>
-  <li><strong>Email:</strong> {{ citizen.email }}</li>
-  <li><strong>Phone:</strong> {{ citizen.phone_number }}</li>
-  <li><strong>Gender:</strong> {{ citizen.gender }}</li>
-  <li><strong>Age:</strong> {{ citizen.age }}</li>
-  <li><strong>Address:</strong> {{ citizen.address }}</li>
-  <li><strong>ID Number:</strong> {{ citizen.id_number }}</li>
-</ul>
+        <!-- Demographics -->
+        <div class="detail-group">
+          <div class="detail-item">
+            <span class="detail-label">Gender</span>
+            <span class="detail-value gender-tag">{{ citizen.gender.label }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Age</span>
+            <span class="detail-value age-badge">{{ citizen.age }} Years</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Address</span>
+            <div class="detail-value">
+              <div class="address-text">{{ citizen.address|linebreaksbr }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<h3>Submitted Cases</h3>
-{% if cases %}
-  <table class="table">
-    <thead>
-      <tr><th>Title</th><th>Status</th><th>Reported</th></tr>
-    </thead>
-    <tbody>
-      {% for case in cases %}
-      <tr>
-        <td>{{ case.title }}</td>
-        <td>{{ case.status.name }}</td>
-        <td>{{ case.submitted_at|date:"Y-m-d" }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-{% else %}
-  <p>No reported cases.</p>
-{% endif %}
+    <!-- Cases Section -->
+    <div class="cases-section">
+      <div class="cases-header">
+        <h2>Submitted Cases</h2>
+        <div class="cases-count">{{ cases|length }} Total Case{{ cases|length|pluralize }}</div>
+      </div>
 
-<a href="javascript:history.back()" class="btn btn--dark">← Back</a>
+      {% if cases %}
+      <!-- Case Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-number">{{ total_cases }}</div>
+          <div class="stat-label">Total Cases</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ in_progress }}</div>
+          <div class="stat-label">In Progress</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ pending }}</div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ resolved }}</div>
+          <div class="stat-label">Resolved</div>
+        </div>
+      </div>
+
+
+      <!-- Case Table -->
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Case Title</th>
+              <th>Status</th>
+              <th>Date Submitted</th>
+              <th>Last Updated</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for case in cases %}
+            <tr>
+              <td class="case-title">{{ case.title }}</td>
+              <td><span class="status-badge status-badge--{{ case.status.name|lower|cut:' ' }}">{{ case.status.name }}</span></td>
+              <td>{{ case.submitted_at|date:"Y-m-d" }}</td>
+              <td>{{ case.updated_at|date:"Y-m-d" }}</td>
+              <td>
+                <a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <div class="empty-state">
+          <h3>No Reported Cases</h3>
+          <p>This citizen has not submitted any cases yet.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Back Button -->
+    <div class="back-button">
+      <a href="javascript:history.back()" class="btn btn--dark">← Back to Dashboard</a>
+    </div>
+  </div>
+</div>
 {% endblock %}

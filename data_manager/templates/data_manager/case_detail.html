@@ -1,72 +1,173 @@
 {% extends 'main.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'styles/case_detail.css' %}">
+{% endblock %}
+
 {% block content %}
+<body>
+<div class="container">
 
-<p><strong>Case Number:</strong> {{ case.id }}</p>
-<p><strong>Name:</strong> {{ case.title }}</p>
-<p><strong>Description:</strong> {{ case.description }}</p>
-<p><strong>Case Type:</strong> {{ case.case_type }}</p>
-<p><strong>Reported by:</strong> {{ case.user.username }}</p>
-<p><strong>Date Reported:</strong> {{ case.submitted_at|date:"Y-m-d H:i" }}</p>
-<p><strong>Assigned Officer:</strong> {{ case.assigned_officer }}</p>
-<p><strong>Status:</strong> {{ case.status.name }}</p>
-<p><strong>Status Reason:</strong> {{ case.status_reason }}</p>
+  <!-- Case Header -->
+  <div class="case-header">
+    <div class="case-title">
+      <div>
+        <h1>{{ case.title }}</h1>
+        <div class="case-id">Case #{{ case.id }}</div>
+      </div>
+      <div class="status-badge status-badge--{{ case.status.name|lower|cut:" " }}">
+       <p>Case Status: </p> {{ case.status.name }}
+      </div>
+    </div>
 
-{% if user.role == 'officer' and case.assigned_officer == user %}
-    <a href="{% url 'case-update-status' case.id %}" class="btn btn--main">Update Status</a>
-{% endif %}
+    <div class="case-meta">
+      <div class="meta-item">
+        <span class="meta-label">Case Type:</span>
+        <span class="meta-value">{{ case.case_type }}</span>
+      </div>
 
-{% if user.role == 'citizen' and case.user == request.user %}
-    <a href="{% url 'update-case' case.id %}" class="btn btn--main">Update Case</a>
-{% endif %}
+      <div class="meta-item">
+        <span class="meta-label">Reported By:</span>
+        <span class="meta-value">
+          <div class="user-info">
+            <div class="user-avatar">{{ case.user.username|slice:":2"|upper }}</div>
+            <a href="{% url 'citizen-profile' case.user.id %}" style="color: var(--color-main); text-decoration: none;">
+              {{ case.user.name }}
+            </a>
+          </div>
+        </span>
+      </div>
 
-<a href="javascript:history.back()" class="btn btn--dark">← Back</a>
-<hr>
-<h3>Evidence Files</h3>
-{% if case.evidence_files.all %}
-  <ul>
-    {% for file in case.evidence_files.all %}
-    <li>
-      <a href="{{ file.file.url }}" target="_blank">{{ file.file.name }}</a>
-      (Uploaded by {{ file.uploaded_by.username }} on {{ file.uploaded_at|date:"Y-m-d H:i" }})
-    </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>No evidence uploaded yet.</p>
-{% endif %}
+      <div class="meta-item">
+        <span class="meta-label">Date Reported:</span>
+        <span class="meta-value">{{ case.submitted_at|date:"Y-m-d H:i" }}</span>
+      </div>
 
-{% if user.role in 'citizen' %}
-  <a href="{% url 'upload-evidence' case.id %}" class="btn btn--main">Upload Evidence</a>
-{% endif %}
-<hr>
+      <div class="meta-item">
+        <span class="meta-label">Assigned Officer:</span>
+        <span class="meta-value">
+          {% if case.assigned_officer %}
+          <div class="user-info">
+            <div class="user-avatar">{{ case.assigned_officer.username|slice:":2"|upper }}</div>
+            <a href="{% url 'officer-profile' case.assigned_officer.id %}" style="color: var(--color-main); text-decoration: none;">
+              {{ case.assigned_officer.name }}
+            </a>
+          </div>
+          {% else %}
+          Not Assigned
+          {% endif %}
+        </span>
+      </div>
 
-{% if user.role in 'commander' %}
-<h3>Status History</h3>
-{% if case.status_history.all %}
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Status</th>
-        <th>Reason</th>
-        <th>By</th>
-        <th>Date</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for entry in case.status_history.all %}
-      <tr>
-        <td>{{ entry.status.name }}</td>
-        <td>{{ entry.reason }}</td>
-        <td>{{ entry.updated_by.username }}</td>
-        <td>{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
-      </tr>
+      {% if case.status_reason %}
+      <div class="meta-item">
+        <span class="meta-label">Status Reason:</span>
+        <span class="meta-value">{{ case.status_reason }}</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Description Section -->
+  <div class="description-section">
+    <h2>Case Description</h2>
+    <div class="description-text">
+      {{ case.description }}
+    </div>
+  </div>
+
+
+
+  <!-- Evidence Section -->
+  <div class="evidence-section">
+    <div class="section-header">
+      <h2>Evidence Files</h2>
+      {% if user.role == 'citizen' and case.user == request.user %}
+        <a href="{% url 'upload-evidence' case.id %}" class="btn btn--main">Upload Evidence</a>
+      {% endif %}
+    </div>
+
+    {% if case.evidence_files.all %}
+    <ul class="evidence-list">
+      {% for file in case.evidence_files.all %}
+      <li class="evidence-item">
+        <div class="evidence-info">
+          <div class="evidence-name">
+            <svg class="file-icon" viewBox="0 0 24 24">
+              <path d="M14,2H6A2,2...Z" />
+            </svg>
+            {{ file.file.name }}
+          </div>
+          <div class="evidence-meta">
+            Uploaded by {{ file.uploaded_by.username }} on {{ file.uploaded_at|date:"Y-m-d H:i" }}
+          </div>
+        </div>
+        <a href="{{ file.file.url }}" class="evidence-link" target="_blank">View File</a>
+      </li>
       {% endfor %}
-    </tbody>
-  </table>
-{% else %}
-  <p>No history available.</p>
-{% endif %}
-{% endif %}
+    </ul>
+    {% else %}
+    <p>No evidence uploaded yet.</p>
+    {% endif %}
+  </div>
 
+  <!-- Status History Section (Commander Only) -->
+  {% if user.role == 'commander' %}
+  <div class="history-section">
+    <div class="section-header" style="padding: 1.5rem 2.5rem; background: var(--color-dark-light);">
+      <h2 style="color: var(--color-light); margin: 0;">Status History</h2>
+    </div>
 
+    {% if case.status_history.all %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Reason</th>
+          <th>Updated By</th>
+          <th>Date & Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in case.status_history.all %}
+        <tr>
+          <td>
+            <span class="status-badge status-badge--{{ entry.status.name|lower|cut:" " }}">
+              {{ entry.status.name }}
+            </span>
+          </td>
+          <td>{{ entry.reason }}</td>
+          <td>
+            <div class="user-info">
+              <div class="user-avatar">{{ entry.updated_by.username|slice:":2"|upper }}</div>
+              {{ entry.updated_by.name }}
+            </div>
+          </td>
+          <td>{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>No history available.</p>
+    {% endif %}
+  </div>
+  {% endif %}
+  <br>
+
+    <div class="action-buttons">
+    {% if user.role == 'officer' and case.assigned_officer == user %}
+      <a href="{% url 'case-update-status' case.id %}" class="btn btn--main">Update Status</a>
+    {% endif %}
+
+    {% if user.role == 'citizen' and case.user == request.user %}
+      <a href="{% url 'update-case' case.id %}" class="btn btn--main">Update Case</a>
+    {% endif %}
+
+    <a href="javascript:history.back()" class="btn btn--dark">← Back</a>
+  </div>
+
+</div>
+</body>
 {% endblock %}
