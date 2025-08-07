@@ -160,10 +160,23 @@ def officer_dashboard(request):
     })
 
 
-@login_required
 def citizen_dashboard(request):
-    cases = Case.objects.filter(user=request.user).order_by('-submitted_at')
-    return render(request, 'data_manager/citizen_dashboard.html', {'cases': cases})
+    user = request.user
+    cases = Case.objects.filter(user=user)
+
+    investigating_count = cases.filter(status__name__iexact='Investigating').count()
+    resolved_count = cases.filter(status__name__iexact='Resolved').count()
+    pending_count = cases.filter(status__name__iexact='Pending').count()
+
+    context = {
+        'user': user,
+        'cases': cases,
+        'investigating_count': investigating_count,
+        'resolved_count': resolved_count,
+        'pending_count': pending_count,
+    }
+    return render(request, 'data_manager/citizen_dashboard.html', context)
+
 
 def commander_dashboard(request):
     officers = User.objects.filter(role='officer') \

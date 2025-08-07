@@ -1,19 +1,161 @@
-{% extends "main.html" %}
+{% extends 'main.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'styles/case_form.css' %}">
+{% endblock %}
+
+
 {% block content %}
+<main class="layout">
+  <div class="container">
+    <div class="layout__box">
+      <div class="layout__boxHeader">
+        <div class="layout__boxTitle">
+          <svg onclick="goBack()" version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+            <title>arrow-left</title>
+            <path d="M13.723 2.286l-13.723 13.714 13.719 13.714 1.616-1.611-10.96-10.96h27.625v-2.286h-27.625l10.965-10.965-1.616-1.607z"></path>
+          </svg>
+          <h3>Report a Case</h3>
+        </div>
+      </div>
 
-<div>
-  <h3>Report a Case</h3>
-  <form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
+      <div class="layout__body">
+        <div class="form-intro">
+          <h4>Help Us Keep Your Community Safe</h4>
+          <p>Please provide as much detail as possible about the incident. All fields marked with <span style="color: var(--color-error);">*</span> are required. Your report will be reviewed and assigned to an appropriate officer.</p>
+        </div>
 
-    {{ form.as_p }}
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
 
-    <h4>Optional: Upload Evidence</h4>
-    {{ evidence_form.file.label_tag }}<br>
-    {{ evidence_form.file }}<br><br>
+        <form method="POST" enctype="multipart/form-data" id="caseReportForm">
+          {% csrf_token %}
 
-    <input type="submit" value="Submit">
-  </form>
-</div>
+          <div class="form-sections">
+            <!-- Basic Information -->
+            <div class="form-section">
+              <div class="form-section__header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2"/>
+                </svg>
+                <h4>Basic Information</h4>
+                <span class="step-number">1</span>
+              </div>
 
+              <div class="form-grid">
+                <div class="form__group">
+                  <label for="id_title">Case Title<span class="required">*</span></label>
+                  {% render_field form.title class="form-control" placeholder="Brief description of the incident" %}
+                </div>
+
+                <div class="form__group">
+                  <label for="id_case_type">Case Type<span class="required">*</span></label>
+                  {{ form.case_type|add_class:"form-control" }}
+                </div>
+
+                <div class="form__group">
+                  <label for="id_incident_date">Date & Time of Incident<span class="required">*</span></label>
+                  {{ form.incident_date|add_class:"form-control"|attr:"type:datetime-local" }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Location Details -->
+            <div class="form-section">
+              <div class="form-section__header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                </svg>
+                <h4>Location Details</h4>
+                <span class="step-number">2</span>
+              </div>
+
+              <div class="form-grid">
+                <div class="form__group">
+                  <label for="id_location">Street Address<span class="required">*</span></label>
+                  {{ form.location|add_class:"form-control"|attr:"placeholder:e.g., 123 Main Street" }}
+                </div>
+                <div class="form__group">
+                  <label for="id_city">City<span class="required">*</span></label>
+                  {{ form.city|add_class:"form-control"|attr:"placeholder:e.g., Downtown" }}
+                </div>
+                <div class="form__group">
+                  <label for="id_landmark">Nearest Landmark</label>
+                  {{ form.landmark|add_class:"form-control"|attr:"placeholder:e.g., Near City Mall" }}
+                  <div class="form__help">Optional: Help officers locate the area</div>
+                </div>
+                <div class="form__group">
+                  <label for="id_location_type">Location Type</label>
+                  {{ form.location_type|add_class:"form-control" }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Incident Description -->
+            <div class="form-section">
+              <div class="form-section__header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2Z"/>
+                </svg>
+                <h4>Incident Description</h4>
+                <span class="step-number">3</span>
+              </div>
+
+              <div class="form__group--full">
+                <label for="id_description">Detailed Description<span class="required">*</span></label>
+                {{ form.description|add_class:"form-control"|attr:"rows:8"|attr:"placeholder:Please provide a detailed description of what happened..." }}
+              </div>
+
+              <div class="form-grid" style="margin-top: 2rem;">
+                <div class="form__group">
+                  <label for="id_suspects_involved">Number of People Involved</label>
+                  {{ form.suspects_involved|add_class:"form-control"|attr:"placeholder:0"|attr:"min:0"|attr:"max:50" }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Evidence Upload -->
+            <div class="evidence-section">
+              <div class="evidence-section__header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2Z"/>
+                </svg>
+                <h4>Upload Evidence (Optional)</h4>
+              </div>
+
+              <div class="form__group">
+                {{ evidence_form.file.label_tag }}<br>
+                {{ evidence_form.file }}
+              </div>
+
+              <div class="form__help" style="margin-top: 1rem;">
+                Upload any photos, videos, or documents that support your case. This helps officers better understand the situation.
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form__action">
+            <button type="button" class="btn btn--dark" onclick="goBack()">Cancel</button>
+            <button type="submit" class="btn btn--main">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9,16.17L4.83,12L3.41,13.41L9,19L21,7L19.59,5.59L9,16.17Z"/>
+              </svg>
+              Submit Case Report
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{% static 'styles/js/case_form.js' %}" defer></script>
 {% endblock %}

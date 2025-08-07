@@ -318,7 +318,7 @@ if (conversationThread) conversationThread.scrollTop = conversationThread.scroll
         }
 
         //officer-dashboaard.js
-                function filterCases(status) {
+            function filterCases(status) {
             // Update active filter button
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
@@ -356,4 +356,82 @@ if (conversationThread) conversationThread.scrollTop = conversationThread.scroll
         // Initialize the dashboard
         document.addEventListener('DOMContentLoaded', function() {
             updateWorkloadCounter();
+        });
+
+        // update-case status.js
+            function showStatusPreview() {
+            const statusSelect = document.getElementById('status');
+            const preview = document.getElementById('statusPreview');
+            const newStatusText = document.getElementById('newStatusText');
+            
+            if (statusSelect.value) {
+                const statusOptions = {
+                    'open': 'Open',
+                    'investigating': 'Under Investigation',
+                    'pending': 'Pending Review',
+                    'closed': 'Closed',
+                    'on_hold': 'On Hold',
+                    'transferred': 'Transferred'
+                };
+                
+                newStatusText.textContent = statusOptions[statusSelect.value];
+                preview.classList.add('show');
+            } else {
+                preview.classList.remove('show');
+            }
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const status = document.getElementById('status').value;
+            const reason = document.getElementById('status_reason').value.trim();
+            
+            if (!status) {
+                alert('Please select a new status for the case.');
+                return;
+            }
+            
+            if (!reason) {
+                alert('Please provide a reason for the status change.');
+                return;
+            }
+
+            if (reason.length < 10) {
+                alert('Please provide a more detailed reason (at least 10 characters).');
+                return;
+            }
+
+            // Confirmation dialog
+            const statusOptions = {
+                'open': 'Open',
+                'investigating': 'Under Investigation', 
+                'pending': 'Pending Review',
+                'closed': 'Closed',
+                'on_hold': 'On Hold',
+                'transferred': 'Transferred'
+            };
+
+            const confirmMessage = `Are you sure you want to change the case status to "${statusOptions[status]}"?\n\nThis action will be recorded in the case history.`;
+            
+            if (confirm(confirmMessage)) {
+                // Simulate form submission
+                alert(`Case status has been successfully updated to "${statusOptions[status]}"\n\nThe case history has been updated with your reason.`);
+                
+                // In a real application, you would submit the form data here
+                // window.location.href = 'officer-dashboard.html';
+            }
+        }
+
+        function goBack() {
+            if (confirm('Are you sure you want to go back? Any unsaved changes will be lost.')) {
+                alert('Navigating back to officer dashboard...');
+                // In a real application: window.history.back() or redirect
+            }
+        }
+
+        // Auto-resize textarea
+        document.getElementById('status_reason').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
         });

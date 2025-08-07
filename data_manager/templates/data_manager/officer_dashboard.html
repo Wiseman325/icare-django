@@ -12,8 +12,9 @@
     <div class="dashboard-header">
         <div class="dashboard-header__left">
             <div class="officer-avatar">
-                {{ user.username|slice:":2"|upper }}
+                <img src="{{ user.avatar.url }}" alt="Profile Picture" class="avatar-img">
             </div>
+
             <div>
                 <h2>Officer Dashboard</h2>
                 <p>Welcome back, {{ user.name }}</p>

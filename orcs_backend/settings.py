@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'data_manager',
     'rest_framework',
-
+    'widget_tweaks',
 ]
 
 AUTH_USER_MODEL = 'data_manager.User'

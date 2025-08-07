@@ -9,7 +9,7 @@
     <!-- Static Assets -->
     <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="{% static 'styles/style.css' %}">
-    <link rel="stylesheet" href="{% static 'styles/commander_dashboard.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'styles/commander_dashboard.css' %}"> -->
     <link rel="stylesheet" href="{% static 'styles/pagination.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 
@@ -34,6 +34,9 @@
 
     <!-- JS -->
     <script src="{% static 'js/script.js' %}"></script>
+
+    
+    {% block extra_js %}{% endblock %}
 
 </body>
 </html>

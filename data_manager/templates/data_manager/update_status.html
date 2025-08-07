@@ -1,12 +1,121 @@
 {% extends 'main.html' %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'styles/update_status.css' %}">
+{% endblock %}
+
 {% block content %}
+<main class="layout">
+    <div class="container">
+        <div class="layout__box">
+            <div class="layout__boxHeader">
+                <div class="layout__boxTitle">
+                    <a href="javascript:history.back()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 32 32">
+                            <path d="M13.723 2.286l-13.723 13.714 13.719 13.714 1.616-1.611-10.96-10.96h27.625v-2.286h-27.625l10.965-10.965-1.616-1.607z"/>
+                        </svg>
+                    </a>
+                    <h3>Update Case Status</h3>
+                </div>
+            </div>
+            
+            <div class="layout__body">
+                <!-- Case Information -->
+                <!-- <div class="case-info">
+                    <div class="case-info__header">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                        </svg>
+                        <h2 class="case-info__title">{{ case.title }}</h2>
+                    </div>
 
-<h2>Update Case Status: {{ case.title }}</h2>
+                    <div class="case-details">
+                        <div class="case-detail">
+                            <span class="case-detail__label">Case ID</span>
+                            <span class="case-detail__value">#{{ case.id }}</span>
+                        </div>
+                        <div class="case-detail">
+                            <span class="case-detail__label">Assigned Officer</span>
+                            <span class="case-detail__value">{{ case.assigned_officer.name|default:case.assigned_officer.username }}</span>
+                        </div>
+                        <div class="case-detail">
+                            <span class="case-detail__label">Current Status</span>
+                            <span class="case-detail__value">
+                                <span class="current-status current-status--{{ case.status.name|lower|cut:' ' }}">
+                                    {{ case.status.name }}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="case-detail">
+                            <span class="case-detail__label">Last Updated</span>
+                            <span class="case-detail__value">{{ case.updated_at|date:"Y-m-d H:i" }}</span>
+                        </div>
+                    </div>
+                </div> -->
 
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn--main">Update Status</button>
-</form>
+                <!-- Status Update Form -->
+                <div class="form-section">
+                    <div class="form-section__header">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                        </svg>
+                        <h4>Update Case Status</h4>
+                    </div>
 
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="form__group">
+                            {{ form.status.label_tag }}
+                            {{ form.status }}
+                        </div>
+
+                        <div class="form__group">
+                            {{ form.status_reason.label_tag }}
+                            {{ form.status_reason }}
+                            <div class="form__help">
+                                Provide a clear explanation for the status change. This will be logged in the case history.
+                            </div>
+                        </div>
+
+                        <div class="status-preview">
+                            <h5>Status Change Summary:</h5>
+                            <p>Status will be changed from 
+                                <strong>{{ case.status.name }}</strong> 
+                                to 
+                                <span class="new-status" id="newStatusText">[Select a status]</span>
+                            </p>
+                        </div>
+
+                        <div class="form__action">
+                            <a href="javascript:history.back()" class="btn btn--dark">Cancel</a>
+                            <button type="submit" class="btn btn--main">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                                </svg>
+                                Update Status
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // JavaScript to preview selected status dynamically
+    document.addEventListener('DOMContentLoaded', () => {
+        const statusSelect = document.getElementById('id_status');
+        const previewText = document.getElementById('newStatusText');
+
+        if (statusSelect) {
+            statusSelect.addEventListener('change', function () {
+                previewText.textContent = this.options[this.selectedIndex].text;
+            });
+        }
+    });
+</script>
 {% endblock %}

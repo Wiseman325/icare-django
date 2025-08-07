@@ -61,7 +61,7 @@
             gap: 2rem;
         }
 
-        .officer-avatar {
+        .citizen-avatar {
             width: 6rem;
             height: 6rem;
             border-radius: 50%;
@@ -92,7 +92,7 @@
             text-align: right;
         }
 
-        .workload-counter {
+        .cases-counter {
             background: var(--color-main);
             color: var(--color-dark);
             padding: 1rem 2rem;
@@ -103,14 +103,14 @@
             margin-bottom: 1rem;
         }
 
-        .last-login {
+        .member-since {
             color: var(--color-gray);
             font-size: 1.3rem;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 2rem;
             margin-bottom: 3rem;
         }
@@ -147,14 +147,14 @@
         }
 
         .stat-card__number {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 700;
             color: var(--color-light);
             margin-bottom: 0.5rem;
         }
 
         .stat-card__label {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             color: var(--color-gray);
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -183,27 +183,37 @@
             letter-spacing: 1px;
         }
 
-        .filter-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .filter-btn {
-            padding: 0.8rem 1.5rem;
-            background: transparent;
-            border: 1px solid var(--color-main);
-            color: var(--color-main);
-            border-radius: 2rem;
+        .btn {
+            background-color: transparent;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1.3rem;
+            transition: all ease-in-out 0.3s;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.15);
             font-weight: 500;
+            text-decoration: none;
+            font-size: 1.4rem;
         }
 
-        .filter-btn.active,
-        .filter-btn:hover {
-            background: var(--color-main);
+        .btn--main {
+            background-color: var(--color-main);
             color: var(--color-dark);
+        }
+
+        .btn--small {
+            background-color: var(--color-main);
+            color: var(--color-dark);
+            padding: 0.8rem 1.5rem;
+            font-size: 1.3rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
         }
 
         .table-container {
@@ -221,7 +231,7 @@
             text-align: left;
             font-weight: 700;
             color: var(--color-light);
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             border-bottom: 2px solid var(--color-dark-light);
@@ -241,15 +251,17 @@
         .case-title {
             font-weight: 600;
             color: var(--color-light);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
+            font-size: 1.5rem;
         }
 
-        .case-id {
-            font-size: 1.2rem;
-            color: var(--color-gray);
+        .case-type {
+            font-size: 1.3rem;
+            color: var(--color-main);
+            font-weight: 500;
         }
 
-        .status-badge {
+        .badge {
             display: inline-block;
             padding: 0.6rem 1.2rem;
             border-radius: 2rem;
@@ -259,77 +271,85 @@
             letter-spacing: 1px;
         }
 
-        .status-badge--open {
+        .badge--open {
             background-color: var(--color-warning);
             color: var(--color-dark);
         }
 
-        .status-badge--investigating {
+        .badge--investigating {
             background-color: var(--color-main);
             color: var(--color-dark);
         }
 
-        .status-badge--closed {
+        .badge--closed {
             background-color: var(--color-success);
             color: var(--color-dark);
         }
 
-        .status-badge--pending {
+        .badge--pending {
             background-color: var(--color-error);
             color: var(--color-light);
         }
 
-        .btn {
-            background-color: transparent;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.8rem;
-            cursor: pointer;
-            transition: all ease-in-out 0.3s;
-            padding: 0.8rem 1.5rem;
-            border-radius: 5px;
-            box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.15);
-            font-weight: 500;
-            text-decoration: none;
+        .status-reason {
+            max-width: 200px;
             font-size: 1.3rem;
-            margin: 0 0.3rem;
+            color: var(--color-gray);
         }
 
-        .btn--small {
-            background-color: var(--color-main);
-            color: var(--color-dark);
-            padding: 0.6rem 1.2rem;
-        }
-
-        .btn--dark {
-            background-color: var(--color-dark-light);
-            color: var(--color-light);
-            padding: 0.6rem 1.2rem;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
+        .status-reason em {
+            color: var(--color-light-gray);
+            font-style: italic;
         }
 
         .empty-state {
             text-align: center;
-            padding: 4rem;
+            padding: 6rem 2rem;
             color: var(--color-gray);
         }
 
         .empty-state svg {
-            width: 6rem;
-            height: 6rem;
+            width: 8rem;
+            height: 8rem;
             fill: var(--color-gray);
             margin-bottom: 2rem;
         }
 
         .empty-state h4 {
-            font-size: 1.8rem;
+            font-size: 2.2rem;
             margin-bottom: 1rem;
             color: var(--color-light-gray);
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            font-size: 1.6rem;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-btn {
+            padding: 0.8rem 1.5rem;
+            background: transparent;
+            border: 1px solid var(--color-main);
+            color: var(--color-main);
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.3rem;
+            font-weight: 500;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: var(--color-main);
+            color: var(--color-dark);
         }
 
         @media screen and (max-width: 768px) {
@@ -363,23 +383,6 @@
 
             .filter-buttons {
                 flex-wrap: wrap;
+                justify-content: center;
             }
-
-            .officer-avatar {
-                width: 50px;
-                height: 50px;
-                border-radius: 50%;
-                overflow: hidden;
-                display: inline-block;
-                margin-right: 10px;
-                border: 2px solid var(--color-main); /* optional for a ring effect */
-            }
-
-            .avatar-img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                display: block;
-            }
-
         }

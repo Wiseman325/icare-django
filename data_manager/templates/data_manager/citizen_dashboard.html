@@ -1,46 +1,119 @@
 {% extends 'main.html' %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'styles/citizen_dashboard.css' %}">
+{% endblock %}
+
 {% block content %}
-
-<h2>My Reported Cases</h2>
-
-{% if cases %}
-<table class="table">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Type</th>
-            <th>Date Reported</th>
-            <th>Status</th>
-            <th>Status Reason</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for case in cases %}
-        <tr>
-            <td>{{ case.title }}</td>
-            <td>{{ case.case_type }}</td>
-            <td>{{ case.submitted_at|date:"Y-m-d" }}</td>
-            <td>
-                <span class="badge badge--status">{{ case.status.name }}</span>
-            </td>
-            <td>
-                {% if case.status_reason %}
-                    {{ case.status_reason|truncatechars:30 }}
+<div class="container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="dashboard-header__left">
+            <div class="citizen-avatar">
+                {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" class="avatar-img" alt="{{ user.username }}">
                 {% else %}
-                    <em>Pending...</em>
+                    {{ user.username|slice:":2"|upper }}
                 {% endif %}
-            </td>
-            <td>
-                <a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>You have not reported any cases yet.</p>
-<a href="{% url 'create-case' %}" class="btn btn--main">Report a Case</a>
-{% endif %}
+            </div>
+            <div>
+                <h2>My Reported Cases</h2>
+                <p>Welcome back, {{ user.name }}</p>
+            </div>
+        </div>
+        <div class="dashboard-header__right">
+            <div class="cases-counter">{{ cases|length }} Total Cases</div>
+            <p class="member-since">Member since {{ user.date_joined|date:"F Y" }}</p>
+        </div>
+    </div>
 
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-card__icon"><i class="fas fa-clipboard-list"></i></div>
+            <div class="stat-card__number">{{ cases|length }}</div>
+            <div class="stat-card__label">Total Cases</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card__icon"><i class="fas fa-search"></i></div>
+            <div class="stat-card__number">{{ investigating_count }}</div>
+            <div class="stat-card__label">Under Investigation</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card__icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-card__number">{{ resolved_count }}</div>
+            <div class="stat-card__label">Resolved</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card__icon"><i class="fas fa-hourglass-half"></i></div>
+            <div class="stat-card__number">{{ pending_count }}</div>
+            <div class="stat-card__label">Pending</div>
+        </div>
+    </div>
+
+    <!-- Cases Table -->
+    <div class="cases-section">
+        <div class="cases-section__header">
+            <h3>Case Reports</h3>
+            <a href="{% url 'create-case' %}" class="btn btn--main">
+                <i class="fas fa-plus"></i> Report New Case
+            </a>
+        </div>
+
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterCases('all')">All</button>
+            <button class="filter-btn" onclick="filterCases('open')">Open</button>
+            <button class="filter-btn" onclick="filterCases('investigating')">Investigating</button>
+            <button class="filter-btn" onclick="filterCases('resolved')">Resolved</button>
+            <button class="filter-btn" onclick="filterCases('pending')">Pending</button>
+        </div>
+
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Case Title</th>
+                        <th>Type</th>
+                        <th>Date Reported</th>
+                        <th>Status</th>
+                        <th>Status Reason</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="casesTableBody">
+                    {% for case in cases %}
+                    <tr data-status="{{ case.status.name|lower|cut:' ' }}">
+                        <td>{{ case.title }}</td>
+                        <td>{{ case.case_type }}</td>
+                        <td>{{ case.submitted_at|date:"Y-m-d" }}</td>
+                        <td>
+                            <span class="badge badge--{{ case.status.name|lower|cut:' ' }}">
+                                {{ case.status.name }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if case.status_reason %}
+                                {{ case.status_reason|truncatechars:30 }}
+                            {% else %}
+                                <em>Pending...</em>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'case-detail' case.id %}" class="btn btn--small">View</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6">No cases found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'styles/js/citizen_dashboard.js' %}"></script>
 {% endblock %}
