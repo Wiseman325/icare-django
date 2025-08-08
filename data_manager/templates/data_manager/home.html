@@ -1,55 +1,262 @@
-   {% extends "main.html" %}
+{% extends "main.html" %}
    
-   {% block content %}
+{% load static %}
+{% load widget_tweaks %}
 
-<style>
-    .home-container {
-        display: grid;
-        grid-template-columns: 1fr 3fr;
-    }
-</style>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'styles/home.css' %}">
+{% endblock %}
 
-    <div class="home-container">
-
-        <div>
-            Filter by Case Types:
-            <hr>
-
-            <div>
-                <a href="{% url 'home' %}">All</a>
-            </div>
-            {% for case_type in case_types %}
-            <div>
-                <a href="{% url 'home'%}?q={{case_type.name}}">{{case_type.name}}</a>
-            </div>
-            {% endfor %}
-        </div>
-        
-        <div>
-            <h5>{{case_count}} Case Opened</h5>
-            <a href="{% url 'create-case' %}">Create Case</a>
-            <div>
-                {% for case in cases %}
-                    <div>
-                        {% if user.role == 'commander' %}
-                         <a href="{% url 'assign-officer' case.id %}" class="btn btn--main">Assign Officer</a>
-                         <a href="{% url 'delete-case' case.id %}">Delete</a>
+{% block content %}
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero__content">
+                <div class="hero__text">
+                    <h1>Empowering Communities Through <span class="highlight">Technology</span></h1>
+                    <p>ICARE is a civic technology platform that enables citizens to report crimes, strengthen accountability, and build safer communities together.</p>
+                    <div class="hero__buttons">
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'create-case' %}" class="btn btn--main">
+                            <i class="fas fa-plus-circle"></i>
+                            Report Now
+                        </a>
+                        {% else %}
+                        <a href="{% url 'login' %}" class="btn btn--main">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login to Report
+                        </a>
                         {% endif %}
-                        {% if request.user == case.user %}
-                        <a href="{% url 'update-case' case.id %}">Edit Case</a>
-                        {% endif %}
-                        <span>@{{case.user.username}}</span>
-                        <br>
-                        <small>{{case.case_type.name}}</small>
-                        <h5>{{case.id}} -- <a href="{% url 'case' case.id %}">{{case.description}}</a></h5>
-                        <hr>
+
+                        <a href="{% url 'forum-home' %}" class="btn btn--outline">
+                            <i class="fas fa-chart-line"></i>
+                            View Communinty
+                        </a>
                     </div>
-                {% endfor %}
+                </div>
+                <div class="hero__visual">
+                    <div class="hero__icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                </div>
             </div>
         </div>
-       
+    </section>
 
+    <!-- About Section -->
+    <section class="about">
+        <div class="container">
+            <div class="about__content">
+                <h2 class="section-title">About ICARE</h2>
+                <p class="section-subtitle">Building Trust Through Transparency</p>
+                <p class="about__text">
+                    ICARE bridges the gap between citizens and law enforcement by providing a secure, transparent platform for crime reporting and community engagement. Our mission is to create safer neighborhoods through technology-driven accountability, real-time reporting, and data-driven insights that empower both citizens and authorities to work together effectively.
+                </p>
+            </div>
+        </div>
+    </section>
 
-    </div>
+    <!-- Gallery Section -->
+    <section class="gallery">
+        <div class="container">
+            <h2 class="section-title" style="text-align: center;">Community Impact</h2>
+            <p class="section-subtitle" style="text-align: center;">See how ICARE is making a difference</p>
+            <div class="gallery__grid">
+                <div class="gallery__item">
+                    <i class="fas fa-users"></i>
+                    <div class="gallery__caption">
+                        <h3>Community Engagement</h3>
+                        <p>Citizens actively participating in neighborhood safety</p>
+                    </div>
+                </div>
+                <div class="gallery__item">
+                    <i class="fas fa-balance-scale"></i>
+                    <div class="gallery__caption">
+                        <h3>Justice & Accountability</h3>
+                        <p>Transparent processes ensuring fair outcomes</p>
+                    </div>
+                </div>
+                <div class="gallery__item">
+                    <i class="fas fa-handshake"></i>
+                    <div class="gallery__caption">
+                        <h3>Trust Building</h3>
+                        <p>Strengthening bonds between communities and authorities</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    {% endblock %}
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="section-title" style="text-align: center;">How ICARE Works</h2>
+            <p class="section-subtitle" style="text-align: center;">Simple steps to make a difference</p>
+            <div class="steps">
+                <div class="step">
+                    <div class="step__icon" style="position: relative;">
+                        <i class="fas fa-edit"></i>
+                        <div class="step__number">1</div>
+                    </div>
+                    <h3>Report Incident</h3>
+                    <p>Submit detailed reports securely through our user-friendly platform with photo and location support.</p>
+                </div>
+                <div class="step">
+                    <div class="step__icon" style="position: relative;">
+                        <i class="fas fa-search"></i>
+                        <div class="step__number">2</div>
+                    </div>
+                    <h3>Investigation Begins</h3>
+                    <p>Your report is automatically routed to relevant authorities who begin immediate investigation and response.</p>
+                </div>
+                <div class="step">
+                    <div class="step__icon" style="position: relative;">
+                        <i class="fas fa-check-circle"></i>
+                        <div class="step__number">3</div>
+                    </div>
+                    <h3>Track Progress</h3>
+                    <p>Receive real-time updates on your case status and resolution through our transparent tracking system.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats__grid">
+                <div class="stat">
+                    <div class="stat__number" data-count="2300">0</div>
+                    <div class="stat__label">Cases Reported</div>
+                </div>
+                <div class="stat">
+                    <div class="stat__number" data-count="78">0</div>
+                    <div class="stat__label">% Resolution Rate</div>
+                </div>
+                <div class="stat">
+                    <div class="stat__number" data-count="150">0</div>
+                    <div class="stat__label">Communities Served</div>
+                </div>
+                <div class="stat">
+                    <div class="stat__number" data-count="24">0</div>
+                    <div class="stat__label">Hours Response Time</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq">
+        <div class="container">
+            <h2 class="section-title" style="text-align: center;">Frequently Asked Questions</h2>
+            <div class="faq__list">
+                <div class="faq__item">
+                    <div class="faq__question" onclick="toggleFAQ(this)">
+                        <span>How secure is my personal information?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq__answer">
+                        <p>We use enterprise-grade encryption and security protocols to protect all user data. Your privacy and anonymity options are fully supported, and we comply with all data protection regulations.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <div class="faq__question" onclick="toggleFAQ(this)">
+                        <span>Can I report incidents anonymously?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq__answer">
+                        <p>Yes, ICARE supports anonymous reporting. You can choose to provide contact information for follow-up or submit completely anonymous reports based on your comfort level.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <div class="faq__question" onclick="toggleFAQ(this)">
+                        <span>How long does it take to get a response?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq__answer">
+                        <p>Emergency incidents receive immediate attention within minutes. Non-emergency reports typically receive acknowledgment within 24 hours, with investigation updates provided throughout the process.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <div class="faq__question" onclick="toggleFAQ(this)">
+                        <span>What types of incidents can I report?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq__answer">
+                        <p>You can report crimes, suspicious activities, community safety concerns, infrastructure issues, and other incidents affecting public safety and community wellbeing.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to Make Your Community Safer?</h2>
+            <p>Join thousands of citizens who are already using ICARE to build stronger, safer neighborhoods. Your voice matters, and together we can create positive change.</p>
+            <div class="hero__buttons">
+                <a href="#report" class="btn btn--main">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Report a Case Now
+                </a>
+                <a href="#features" class="btn btn--outline">
+                    <i class="fas fa-cog"></i>
+                    Explore Features
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__content">
+                <div class="footer__section">
+                    <h3>ICARE Platform</h3>
+                    <a href="#about">About Us</a>
+                    <a href="#how-it-works">How It Works</a>
+                    <a href="#privacy">Privacy Policy</a>
+                    <a href="#terms">Terms of Service</a>
+                </div>
+                <div class="footer__section">
+                    <h3>Services</h3>
+                    <a href="#report">Crime Reporting</a>
+                    <a href="#dashboard">Analytics Dashboard</a>
+                    <a href="#tracking">Case Tracking</a>
+                    <a href="#alerts">Community Alerts</a>
+                </div>
+                <div class="footer__section">
+                    <h3>Support</h3>
+                    <a href="#help">Help Center</a>
+                    <a href="#contact">Contact Us</a>
+                    <a href="#faq">FAQs</a>
+                    <a href="#training">Training Resources</a>
+                </div>
+                <div class="footer__section">
+                    <h3>Connect With Us</h3>
+                    <p style="color: var(--color-light-gray); margin-bottom: 2rem;">Stay updated with community safety initiatives and platform updates.</p>
+                    <div style="color: var(--color-light-gray);">
+                        <p><i class="fas fa-envelope"></i> support@icare.org</p>
+                        <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+                    </div>
+                    <div class="footer__social">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <p>&copy; 2024 ICARE Platform. All rights reserved. Building safer communities through technology.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'styles/js/home.js' %}" defer></script>
+{% endblock %}

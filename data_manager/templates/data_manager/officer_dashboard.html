@@ -47,7 +47,7 @@
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-card__number">{{ solved_count }}</div>
-            <div class="stat-card__label">Solved This Month</div>
+            <div class="stat-card__label">Solved Cases</div>
         </div>
         <div class="stat-card">
             <div class="stat-card__icon">
@@ -62,6 +62,14 @@
     <div class="cases-section">
         <div class="cases-section__header">
             <h3>Your Assigned Cases</h3>
+        </div>
+
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterCases('all')">All</button>
+            <button class="filter-btn" onclick="filterCases('open')">Open</button>
+            <button class="filter-btn" onclick="filterCases('investigating')">Investigating</button>
+            <button class="filter-btn" onclick="filterCases('resolved')">Resolved</button>
+            <button class="filter-btn" onclick="filterCases('pending')">Urgent Priority</button>
         </div>
 
         <div class="table-container">

@@ -72,9 +72,9 @@ class UserForm(forms.ModelForm):
                     'years_of_service', 'management_level'
                 ]
             elif user.role == 'officer':
-                exclude_fields = ['management_level']
+                exclude_fields = ['management_level', 'id_number', 'address', 'age', 'gender']
             else:  # commander
-                exclude_fields = []
+                exclude_fields = ['id_number', 'address', 'age', 'gender', 'speciality', 'rank', 'years_of_service', 'station']
 
             for field in exclude_fields:
                 if field in self.fields:
