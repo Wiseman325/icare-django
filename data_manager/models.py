@@ -77,6 +77,16 @@ class CaseType(models.Model):
 
 
 class Case(models.Model):
+    LOCATION_TYPE_CHOICES = [
+        ('public_space', 'Public Space'),
+        ('residential_area', 'Residential Area'),
+        ('commercial_area', 'Commercial Area'),
+        ('educational_institution', 'Educational Institution'),
+        ('government_building', 'Government Building'),
+        ('transport_hub', 'Transport Hub'),
+        ('other', 'Other'),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=CASCADE)
     assigned_officer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -85,14 +95,32 @@ class Case(models.Model):
         blank=True,
         related_name='assigned_cases'
     )
+
+    # Basic Information
     title = models.CharField(max_length=100)
-    description = models.TextField(max_length=500)
+    case_type = models.ForeignKey(CaseType, on_delete=models.SET_NULL, null=True)
+    incident_date = models.DateTimeField(null=True, blank=True)  # datetime-local from form
+
+    # Location Details
     street_address = models.CharField(max_length=255, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
-    case_type = models.ForeignKey(CaseType, on_delete=models.SET_NULL, null=True)
-    incident_date = models.DateField(null=True, blank=True)  # new field
-    status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True)
+    landmark = models.CharField(max_length=255, blank=True, null=True)
+    location_type = models.CharField(
+        max_length=50,
+        choices=LOCATION_TYPE_CHOICES,
+        blank=True,
+        null=True
+    )
+
+    # Incident Description
+    description = models.TextField(max_length=500)
+    suspects_involved = models.PositiveIntegerField(default=0)
+
+    # Status tracking
+    status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True, default=1)  
     status_reason = models.TextField(max_length=2500, blank=True, null=True)
+
+    # System fields
     updated_at = models.DateTimeField(auto_now=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
@@ -101,6 +129,7 @@ class Case(models.Model):
 
     def __str__(self):
         return self.title
+    
 
 class CaseStatusHistory(models.Model):
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='status_history')
@@ -113,13 +142,25 @@ class CaseStatusHistory(models.Model):
         return f"{self.case.title} - {self.status.name} by {self.updated_by.username}"
     
 class EvidenceFile(models.Model):
+    EVIDENCE_CATEGORY_CHOICES = [
+        ('video', 'Video File'),
+        ('audio', 'Audio File'),
+        ('document', 'Document File'),
+        ('image', 'Image File'),
+        ('other', 'Other'),
+    ]
+
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='evidence_files')
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    description = models.TextField(max_length=2000, blank=True, null=True)
+    category = models.CharField(max_length=50, choices=EVIDENCE_CATEGORY_CHOICES, null=True, blank=True)
+    date_collected = models.DateField(null=True, blank=True)
     file = models.FileField(upload_to='evidence/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.case.title} - {self.file.name}"
+
 
 class Status(models.Model):
     name = models.CharField(max_length=50)

@@ -59,7 +59,7 @@
 
                 <div class="form__group">
                   <label for="id_incident_date">Date & Time of Incident<span class="required">*</span></label>
-                  {{ form.incident_date|add_class:"form-control"|attr:"type:datetime-local" }}
+                    {{ form.incident_date|add_class:"form-control"|attr:"type:datetime-local" }}
                 </div>
               </div>
             </div>
@@ -77,7 +77,7 @@
               <div class="form-grid">
                 <div class="form__group">
                   <label for="id_location">Street Address<span class="required">*</span></label>
-                  {{ form.location|add_class:"form-control"|attr:"placeholder:e.g., 123 Main Street" }}
+                  {{ form.street_address|add_class:"form-control"|attr:"placeholder:e.g., 123 Main Street" }}
                 </div>
                 <div class="form__group">
                   <label for="id_city">City<span class="required">*</span></label>
@@ -154,7 +154,7 @@
 </main>
 {% endblock %}
 
-
 {% block extra_js %}
-<script src="{% static 'styles/js/case_form.js' %}" defer></script>
+<script src="{% static 'js/case_form.js' %}" defer></script>
 {% endblock %}
+

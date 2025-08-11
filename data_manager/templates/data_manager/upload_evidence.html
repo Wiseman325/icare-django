@@ -58,6 +58,12 @@
             </div>
 
             <div class="form__group">
+              <label for="id_category">Evidence Category<span class="required">*</span></label>
+              {{ form.category }}
+            </div>
+
+
+            <div class="form__group">
               <label for="id_date_collected">Date Collected<span class="required">*</span></label>
               <input type="date" name="date_collected" id="id_date_collected" class="form-control" value="{{ form.date_collected.value|default:'' }}">
             </div>
@@ -82,4 +88,8 @@
     </div>
   </main>
 </body>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/evidence.js' %}" defer></script>
 {% endblock %}

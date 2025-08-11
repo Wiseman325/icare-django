@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from functools import wraps
 from django.db.models import Q, Count
 from datetime import datetime, timedelta
+from django.utils import timezone
 from .models import Case, CaseType, roomForum, topic, Message, User, CaseStatusHistory
 from .forms import CaseForm, RoomForm, UserForm, MyUserCreationForm, AssignOfficerForm, CaseStatusForm, EvidenceUploadForm
 
@@ -179,10 +180,12 @@ def citizen_dashboard(request):
 
 
 def commander_dashboard(request):
+    ACTIVE_STATUSES = ['In Progress', 'Open', 'Pending', 'Under Investigation', 'Officer Assigned', 'Awaiting Evidence', 'Pending Review']
+
     officers = User.objects.filter(role='officer') \
         .annotate(
             case_count=Count('assigned_cases'),
-            active_case_count=Count('assigned_cases', filter=Q(assigned_cases__status__name='In Progress'))
+            active_case_count=Count('assigned_cases', filter=Q(assigned_cases__status__name=ACTIVE_STATUSES))
         )
 
     assigned_cases = Case.objects.exclude(assigned_officer=None)
@@ -287,23 +290,21 @@ def createCase(request):
     if request.method == 'POST':
         case_form = CaseForm(request.POST)
         evidence_form = EvidenceUploadForm(request.POST, request.FILES)
-
         if case_form.is_valid():
             case = case_form.save(commit=False)
             case.user = request.user
             case.save()
-
             if evidence_form.is_valid() and 'file' in request.FILES:
                 evidence = evidence_form.save(commit=False)
                 evidence.case = case
                 evidence.uploaded_by = request.user
                 evidence.save()
-
             return redirect('dashboard-redirect')
 
     context = {
         'form': case_form,
-        'evidence_form': evidence_form
+        'evidence_form': evidence_form,
+        'now': timezone.now()  # ✅ add this line
     }
     return render(request, 'data_manager/case_form.html', context)
 

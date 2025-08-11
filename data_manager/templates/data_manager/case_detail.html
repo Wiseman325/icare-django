@@ -55,7 +55,7 @@
             </a>
           </div>
           {% else %}
-          Not Assigned
+          <span class="not-provided">Not Assigned</span>
           {% endif %}
         </span>
       </div>
@@ -66,23 +66,136 @@
         <span class="meta-value">{{ case.status_reason }}</span>
       </div>
       {% endif %}
+
+    </div> <!-- End of .case-meta -->
+  </div> <!-- End of .case-header -->
+
+  <!-- Incident Details Section -->
+  <div class="incident-details-section">
+    <div class="section-header">
+      <h2>
+        <svg class="section-icon" viewBox="0 0 24 24" width="24" height="24">
+          <path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+        Incident Details
+      </h2>
+    </div>
+    
+    <div class="incident-grid">
+      <div class="incident-item">
+        <div class="incident-icon">
+        </div>
+        <div class="incident-content">
+          <span class="incident-label">Incident Date: </span>
+          <span class="incident-value">
+            {% if case.incident_date %}
+              {{ case.incident_date|date:"F j, Y \a\t g:i A" }}
+            {% else %}
+              <span class="not-provided">Date not specified</span>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <div class="incident-item">
+        <div class="incident-icon">
+        </div>
+        <div class="incident-content">
+          <span class="incident-label">Street Address: </span>
+          <span class="incident-value">
+            {% if case.street_address %}
+              {{ case.street_address }}
+            {% else %}
+              <span class="not-provided">Address not provided</span>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <div class="incident-item">
+        <div class="incident-icon">
+        </div>
+        <div class="incident-content">
+          <span class="incident-label">City: </span>
+          <span class="incident-value">
+            {% if case.city %}
+              {{ case.city }}
+            {% else %}
+              <span class="not-provided">City not specified</span>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <div class="incident-item">
+        <div class="incident-icon">
+        </div>
+        <div class="incident-content">
+          <span class="incident-label">Landmark: </span>
+          <span class="incident-value">
+            {% if case.landmark %}
+              {{ case.landmark }}
+            {% else %}
+              <span class="not-provided">No landmark specified</span>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <div class="incident-item">
+        <div class="incident-icon">
+        </div>
+        <div class="incident-content">
+          <span class="incident-label">Location Type: </span>
+          <span class="incident-value">
+            {% if case.location_type %}
+              {{ case.get_location_type_display }}
+            {% else %}
+              <span class="not-provided">Type not specified</span>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      
+      <div class="meta-item">
+        <span class="meta-label">Suspects Involved:</span>
+        <span class="meta-value">
+          {% if case.suspects_involved %}
+            {{ case.suspects_involved }}
+          {% else %}
+            <span class="not-provided">None Reported</span>
+          {% endif %}
+        </span>
+      </div>
     </div>
   </div>
 
   <!-- Description Section -->
   <div class="description-section">
-    <h2>Case Description</h2>
+    <div class="section-header">
+      <h2>
+        <svg class="section-icon" viewBox="0 0 24 24" width="24" height="24">
+          <path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+          <polyline fill="none" stroke="currentColor" stroke-width="2" points="14,2 14,8 20,8"/>
+        </svg>
+        Case Description
+      </h2>
+    </div>
     <div class="description-text">
       {{ case.description }}
     </div>
   </div>
 
-
-
   <!-- Evidence Section -->
   <div class="evidence-section">
     <div class="section-header">
-      <h2>Evidence Files</h2>
+      <h2>
+        <svg class="section-icon" viewBox="0 0 24 24" width="24" height="24">
+          <path fill="currentColor" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Evidence Files
+      </h2>
       {% if user.role == 'citizen' and case.user == request.user %}
         <a href="{% url 'upload-evidence' case.id %}" class="btn btn--main">Upload Evidence</a>
       {% endif %}
@@ -94,13 +207,16 @@
       <li class="evidence-item">
         <div class="evidence-info">
           <div class="evidence-name">
-            <svg class="file-icon" viewBox="0 0 24 24">
-              <path d="M14,2H6A2,2...Z" />
-            </svg>
-            {{ file.file.name }}
-          </div>
-          <div class="evidence-meta">
-            Uploaded by {{ file.uploaded_by.username }} on {{ file.uploaded_at|date:"Y-m-d H:i" }}
+              <!-- <svg class="file-icon" viewBox="0 0 24 24">
+                <path d="M14,2H6A2,2...Z" />
+              </svg> -->
+            <div class="evidence-meta">
+              <strong>Category:</strong> {{ file.get_category_display }}<br>
+              <strong>Description:</strong> {{ file.description }}<br>
+              <strong>Date Collected:</strong> {{ file.date_collected|date:"Y-m-d" }}<br>
+              <strong>Uploaded By:</strong> {{ file.uploaded_by.username }}<br>
+              <strong>Uploaded On:</strong> {{ file.uploaded_at|date:"Y-m-d H:i" }}
+            </div>
           </div>
         </div>
         <a href="{{ file.file.url }}" class="evidence-link" target="_blank">View File</a>
@@ -108,7 +224,12 @@
       {% endfor %}
     </ul>
     {% else %}
-    <p>No evidence uploaded yet.</p>
+    <div class="empty-state">
+      <!-- <svg class="empty-icon" viewBox="0 0 24 24" width="48" height="48">
+        <path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg> -->
+      <p>No evidence has been uploaded for this case yet.</p>
+    </div>
     {% endif %}
   </div>
 
@@ -116,7 +237,12 @@
   {% if user.role == 'commander' %}
   <div class="history-section">
     <div class="section-header" style="padding: 1.5rem 2.5rem; background: var(--color-dark-light);">
-      <h2 style="color: var(--color-light); margin: 0;">Status History</h2>
+      <h2 style="color: var(--color-light); margin: 0;">
+        <svg class="section-icon" viewBox="0 0 24 24" width="24" height="24">
+          <path fill="currentColor" d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+        </svg>
+        Status History
+      </h2>
     </div>
 
     {% if case.status_history.all %}
@@ -150,22 +276,33 @@
       </tbody>
     </table>
     {% else %}
-    <p>No history available.</p>
+    <div class="empty-state">
+      <svg class="empty-icon" viewBox="0 0 24 24" width="48" height="48">
+        <path fill="currentColor" d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+      </svg>
+      <h3>No History Available</h3>
+      <p>No status changes have been recorded for this case.</p>
+    </div>
     {% endif %}
   </div>
   {% endif %}
   <br>
 
-    <div class="action-buttons">
+  <!-- Action Buttons -->
+  <div class="action-buttons">
     {% if user.role == 'officer' and case.assigned_officer == user %}
       <a href="{% url 'case-update-status' case.id %}" class="btn btn--main">Update Status</a>
+       <a href="{% url 'officer-dashboard' %}" class="btn btn--dark">Back</a>
     {% endif %}
 
     {% if user.role == 'citizen' and case.user == request.user %}
       <a href="{% url 'update-case' case.id %}" class="btn btn--main">Update Case</a>
+       <a href="{% url 'citizen-dashboard' %}" class="btn btn--dark">Back</a>
     {% endif %}
 
-    <a href="javascript:history.back()" class="btn btn--dark">← Back</a>
+    {% if user.role == 'commander' %}
+    <a href="{% url 'commander-dashboard' %}" class="btn btn--dark">Back</a>
+    {% endif %}
   </div>
 
 </div>
